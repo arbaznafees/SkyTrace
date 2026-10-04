@@ -6,6 +6,7 @@ Tactical disaster weather verification platform backend.
 
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -89,17 +90,20 @@ async def lifespan(app: FastAPI):
             db.commit()
             print("[PERSONNEL READY] Tactical personnel accounts verified (Analyst, Admin, State EOC).")
 
-            # Warm up ML embedding model in background thread to eliminate chat latency cold-starts
-            import threading
-            def warmup_embedding():
-                try:
-                    from backend.app.services.embedding import get_embedding_model
-                    print("[WARMUP] Pre-loading SentenceTransformers embedding model...")
-                    get_embedding_model()
-                    print("[WARMUP READY] Embedding model loaded into memory for zero-latency queries.")
-                except Exception as w_err:
-                    print(f"[WARMUP NOTE] Embedding warmup note: {w_err}")
-            threading.Thread(target=warmup_embedding, daemon=True).start()
+            # Warm up ML embedding model safely outside Render to prevent memory exhaustion crashes
+            if os.getenv("RENDER") is None:
+                import threading
+                def warmup_embedding():
+                    try:
+                        from backend.app.services.embedding import get_embedding_model
+                        print("[WARMUP] Pre-loading SentenceTransformers embedding model...")
+                        get_embedding_model()
+                        print("[WARMUP READY] Embedding model loaded into memory for zero-latency queries.")
+                    except Exception as w_err:
+                        print(f"[WARMUP NOTE] Embedding warmup note: {w_err}")
+                threading.Thread(target=warmup_embedding, daemon=True).start()
+            else:
+                print("[WARMUP SKIPPED] Skipping model pre-load on Render instance to conserve memory.")
 
         except Exception as seed_err:
             db.rollback()
