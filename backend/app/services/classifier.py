@@ -158,7 +158,7 @@ def classify_incident(text: str) -> Dict[str, Any]:
                 f"Return JSON strictly with keys: category, severity, confidence, explanation."
             )
             response = client.models.generate_content(
-                model="gemini-3.8-flash",
+                model=settings.GEMINI_MODEL,
                 contents=prompt,
             )
             parsed = json.loads(response.text.strip().replace("```json", "").replace("```", ""))
@@ -169,7 +169,7 @@ def classify_incident(text: str) -> Dict[str, Any]:
                     "primary_category": cat,
                     "severity": sev,
                     "confidence": float(parsed.get("confidence", 0.90)),
-                    "engine": "gemini-2.5-flash",
+                    "engine": settings.GEMINI_MODEL,
                     "explanation": parsed.get("explanation", "Classified via Gemini AI.")
                 }
         except Exception as e:

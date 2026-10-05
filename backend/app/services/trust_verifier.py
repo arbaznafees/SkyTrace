@@ -219,7 +219,7 @@ def run_borderline_ai_triage(headline: str, summary: str, initial_trust: float) 
             f"- 'reasoning': 1 concise sentence explaining your meteorological verdict."
         )
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model=settings.GEMINI_MODEL,
             contents=prompt,
         )
         import json

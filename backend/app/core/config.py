@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     
     # AI / Model Keys (Gemini for incident classification and RAG chat)
     GEMINI_API_KEY: str
+    GEMINI_MODEL: str = "gemini-3.5-flash-lite"
 
     @field_validator("DATABASE_URL")
     @classmethod

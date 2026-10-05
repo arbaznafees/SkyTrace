@@ -16,7 +16,35 @@ import {
   Clock,
   Radio,
   ExternalLink,
+  ShieldCheck,
 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
+function normalizeMarkdown(text: string): string {
+  if (!text) return "";
+  // Unescape backslash-escaped markdown formatting characters (*, _, #, [, ], (, ))
+  // Leaves legitimate backslashes, code blocks, URLs, JSON, and math intact
+  return text.replace(/\\([*_#[\]()])/g, "$1");
+}
+
+function isExternalUrl(href?: string): boolean {
+  if (!href) return false;
+  // Relative links and hash anchors are always internal
+  if (href.startsWith("/") || href.startsWith("#") || href.startsWith("?") || href.startsWith("./") || href.startsWith("../")) {
+    return false;
+  }
+  try {
+    const currentOrigin = typeof window !== "undefined" ? window.location.origin : "";
+    const parsed = new URL(href, currentOrigin || "http://localhost:3000");
+    if (currentOrigin) {
+      return parsed.origin !== currentOrigin;
+    }
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
 
 interface MapSnippet {
   event_id: string;
@@ -41,6 +69,8 @@ interface ChatMessage {
   engine?: string;
   citedEvents?: string[];
   mapSnippets?: MapSnippet[];
+  ragUsed?: boolean;
+  intent?: string;
 }
 
 const QUICK_PROMPTS = [
@@ -50,13 +80,6 @@ const QUICK_PROMPTS = [
   "Are roads safe to drive around East Singhbhum, Jharkhand?",
 ];
 
-const LOADING_STAGES = [
-  "Querying INSAT-3D Doppler and ground telemetry...",
-  "Correlating spatial incident clusters in target district...",
-  "Cross-referencing IMD ground-truth & verification status...",
-  "Synthesizing tactical NDMA meteorological briefing...",
-];
-
 export default function SkyTraceChatPage() {
   const [stats, setStats] = useState<HeaderStats | null>(null);
 
@@ -64,65 +87,32 @@ export default function SkyTraceChatPage() {
     fetchHeaderStats().then((data) => {
       if (data) setStats(data);
     });
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.id === "msg-welcome-1" && m.timestamp === "LIVE UTC"
+          ? { ...m, timestamp: new Date().toUTCString().slice(17, 25) + " UTC" }
+          : m
+      )
+    );
   }, []);
 
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "msg-welcome-1",
       sender: "assistant",
-      timestamp: "14:22:00 UTC",
-      engine: "IMD & NDMA Disaster Intelligence Synthesis",
+      timestamp: "LIVE UTC",
+      engine: "SkyTrace Disaster Intelligence Assistant",
       text: "Welcome to SkyTrace Operational Assistant. Powered by INSAT-3D Doppler radar telemetry and verified citizen observations. Ask about localized severe weather alerts, road inundation, or evacuation advisories across India.",
-    },
-    {
-      id: "msg-sample-user",
-      sender: "user",
-      timestamp: "14:23:15 UTC",
-      text: "Any active flash flood alerts in Puri, Odisha?",
-    },
-    {
-      id: "msg-sample-asst",
-      sender: "assistant",
-      timestamp: "14:23:18 UTC",
-      engine: "SkyTrace Bayesian Fusion Engine",
-      text: "FLASH FLOOD WARNING CONFIRMED: High convective storm surge detected along the Puri coastal corridor. Multiple citizen reports corroborate 1.0 to 1.5 ft standing water along VIP Road. IMD Paradip Doppler radar reflectivity exceeds 50 dBZ. Motorists are advised to avoid arterial coastal routes.",
-      mapSnippets: [
-        {
-          event_id: "evt-9001",
-          event_code: "EVT-9001",
-          latitude: 19.8135,
-          longitude: 85.8312,
-          primary_category: "flooding",
-          severity: "severe",
-          headline: "Flash Flooding & Roadway Inundation - Puri Marine Drive",
-          location_name: "Puri Coastal Marine Drive",
-          district: "Puri",
-          state: "Odisha",
-          trust_score: 0.94,
-          verification_status: "verified",
-        },
-      ],
+      ragUsed: false,
     },
   ]);
   const [inputText, setInputText] = useState("");
   const [loading, setLoading] = useState(false);
-  const [loadingStageIndex, setLoadingStageIndex] = useState(0);
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!loading) {
-      setLoadingStageIndex(0);
-      return;
-    }
-    const interval = setInterval(() => {
-      setLoadingStageIndex((prev) => (prev < LOADING_STAGES.length - 1 ? prev + 1 : prev));
-    }, 1400);
-    return () => clearInterval(interval);
-  }, [loading]);
-
-  useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading, loadingStageIndex]);
+  }, [messages, loading]);
 
   const handleSendMessage = async (textToSend?: string) => {
     const query = (textToSend || inputText).trim();
@@ -154,71 +144,34 @@ export default function SkyTraceChatPage() {
 
       if (res.ok) {
         const data = await res.json();
-
-        // Extract map snippets if returned or if location mentioned
-        let snippets: MapSnippet[] = [];
-        if (data.map_snippets && data.map_snippets.length > 0) {
-          snippets = data.map_snippets;
-        } else if (
-          query.toLowerCase().includes("puri") ||
-          query.toLowerCase().includes("odisha") ||
-          query.toLowerCase().includes("flood")
-        ) {
-          snippets = [
-            {
-              event_id: "evt-9001",
-              event_code: "EVT-9001",
-              latitude: 19.8135,
-              longitude: 85.8312,
-              primary_category: "flooding",
-              severity: "severe",
-              headline: "Flash Flooding & Road Inundation - Marine Drive",
-              location_name: "Puri Coastal Marine Drive",
-              district: "Puri",
-              state: "Odisha",
-              trust_score: 0.94,
-              verification_status: "verified",
-            },
-          ];
-        }
+        const ragUsed = Boolean(data.rag_used);
+        const snippets: MapSnippet[] = ragUsed && Array.isArray(data.map_snippets) ? data.map_snippets : [];
 
         const replyMsg: ChatMessage = {
           id: `asst-${Date.now()}`,
           sender: "assistant",
           timestamp: new Date().toUTCString().slice(17, 25) + " UTC",
           text: data.reply || data.response || "No response data available.",
-          engine: "SkyTrace Bayesian Fusion Engine",
-          citedEvents: data.cited_events || [],
+          engine: data.engine || "SkyTrace Copilot",
+          citedEvents: ragUsed ? data.cited_events || [] : [],
           mapSnippets: snippets,
+          ragUsed: ragUsed,
+          intent: data.intent || (ragUsed ? "OPERATIONAL_WEATHER" : "CONVERSATIONAL"),
         };
 
         setMessages((prev) => [...prev, replyMsg]);
       } else {
-        // Fallback realistic response
+        // Clean error response without fabricated data
         setMessages((prev) => [
           ...prev,
           {
             id: `asst-${Date.now()}`,
             sender: "assistant",
             timestamp: new Date().toUTCString().slice(17, 25) + " UTC",
-            text: `[FALLBACK INTEL] Continuous radar correlation confirmed for ${query}. Advisory issued: low-lying road corridors experiencing water depth between 1.0 to 1.5 feet. Avoid non-essential coastal transit.`,
-            engine: "SkyTrace Emergency Synthesis (Cached)",
-            mapSnippets: [
-              {
-                event_id: "evt-9001",
-                event_code: "EVT-9001",
-                latitude: 19.8135,
-                longitude: 85.8312,
-                primary_category: "flooding",
-                severity: "severe",
-                headline: "Flash Flooding & Roadway Inundation - Puri Marine Drive",
-                location_name: "Puri Coastal Marine Drive",
-                district: "Puri",
-                state: "Odisha",
-                trust_score: 0.94,
-                verification_status: "verified",
-              },
-            ],
+            text: "The SkyTrace intelligence service is temporarily unavailable. Please try again shortly.",
+            engine: "SkyTrace System",
+            ragUsed: false,
+            mapSnippets: [],
           },
         ]);
       }
@@ -229,24 +182,10 @@ export default function SkyTraceChatPage() {
           id: `asst-${Date.now()}`,
           sender: "assistant",
           timestamp: new Date().toUTCString().slice(17, 25) + " UTC",
-          text: `[LOCAL SYNTHESIS] Based on recent IMD Doppler telemetry and ground truth reports, heavy precipitation has been verified along the coastal belt. Low-lying arterial routes in Puri remain submerged. Coordinated state response units are deployed.`,
-          engine: "SkyTrace Intelligence Engine",
-          mapSnippets: [
-            {
-              event_id: "evt-9001",
-              event_code: "EVT-9001",
-              latitude: 19.8135,
-              longitude: 85.8312,
-              primary_category: "flooding",
-              severity: "severe",
-              headline: "Flash Flooding & Roadway Inundation - Puri Marine Drive",
-              location_name: "Puri Coastal Marine Drive",
-              district: "Puri",
-              state: "Odisha",
-              trust_score: 0.94,
-              verification_status: "verified",
-            },
-          ],
+          text: "The SkyTrace intelligence service is temporarily unreachable. Please check your connection or try again shortly.",
+          engine: "SkyTrace System",
+          ragUsed: false,
+          mapSnippets: [],
         },
       ]);
     } finally {
@@ -334,19 +273,67 @@ export default function SkyTraceChatPage() {
                           : "border-slate-200 text-slate-400"
                       }`}
                     >
-                      <span className="font-semibold">
-                        {isUser ? "Field Analyst / Observer" : msg.engine || "SkyTrace Copilot"}
-                      </span>
+                      <div className="flex items-center gap-1.5 font-semibold">
+                        <span>
+                          {isUser ? "Field Analyst / Observer" : msg.engine || "SkyTrace Copilot"}
+                        </span>
+                        {msg.ragUsed && (
+                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 bg-blue-100 text-blue-700 rounded text-[9px] font-medium border border-blue-200">
+                            <ShieldCheck size={10} />
+                            <span>Grounded Telemetry</span>
+                          </span>
+                        )}
+                      </div>
                       <span>{msg.timestamp}</span>
                     </div>
 
                     {/* Message Body */}
-                    <p className="whitespace-pre-line text-xs font-normal">
-                      {msg.text}
-                    </p>
+                    {isUser ? (
+                      <p className="whitespace-pre-line text-xs font-normal">
+                        {msg.text}
+                      </p>
+                    ) : (
+                      <div className="text-xs leading-relaxed space-y-2 text-slate-800 break-words">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            p: ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
+                            h1: ({ children }) => <h1 className="text-sm font-bold text-slate-900 mt-2.5 mb-1">{children}</h1>,
+                            h2: ({ children }) => <h2 className="text-xs font-bold text-slate-900 mt-2 mb-1">{children}</h2>,
+                            h3: ({ children }) => <h3 className="text-xs font-semibold text-slate-900 mt-1.5 mb-0.5">{children}</h3>,
+                            strong: ({ children }) => <strong className="font-semibold text-slate-900">{children}</strong>,
+                            em: ({ children }) => <em className="italic">{children}</em>,
+                            ul: ({ children }) => <ul className="list-disc pl-4 space-y-1 my-1.5">{children}</ul>,
+                            ol: ({ children }) => <ol className="list-decimal pl-4 space-y-1 my-1.5">{children}</ol>,
+                            li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+                            code: ({ children }) => (
+                              <code className="px-1.5 py-0.5 bg-slate-200/70 text-slate-900 rounded font-mono text-[11px]">
+                                {children}
+                              </code>
+                            ),
+                            a: ({ href, children }) => {
+                              const isExternal = isExternalUrl(href);
+                              return (
+                                <a
+                                  href={href}
+                                  target={isExternal ? "_blank" : undefined}
+                                  rel={isExternal ? "noopener noreferrer" : undefined}
+                                  className="text-blue-600 hover:text-blue-800 underline font-medium inline-flex items-center gap-0.5 transition-colors"
+                                >
+                                  <span>{children}</span>
+                                  {isExternal && <ExternalLink size={10} className="inline shrink-0" />}
+                                </a>
+                              );
+                            },
+                          }}
+                        >
+                          {normalizeMarkdown(msg.text)}
+                        </ReactMarkdown>
+                      </div>
+                    )}
 
-                    {/* Attached Tactical Map Snippet Component */}
-                    {msg.mapSnippets && msg.mapSnippets.length > 0 && (
+                    {/* Attached Tactical Map Snippet Component (Rendered strictly when ragUsed is true) */}
+                    {msg.ragUsed && msg.mapSnippets && msg.mapSnippets.length > 0 && (
                       <div className="mt-3 pt-2 border-t border-slate-200 space-y-2">
                         {msg.mapSnippets.map((snippet) => {
                           const normStatus = (snippet.verification_status || "").toLowerCase();
@@ -421,23 +408,9 @@ export default function SkyTraceChatPage() {
                 <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
                   <Bot size={16} />
                 </div>
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-700 flex flex-col gap-2 min-w-[280px] max-w-[360px] shadow-2xs">
-                  <div className="flex items-center gap-2 font-medium">
-                    <Sparkles size={14} className="text-blue-600 animate-spin shrink-0" />
-                    <span className="text-slate-900 text-xs">{LOADING_STAGES[loadingStageIndex]}</span>
-                  </div>
-                  <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
-                    <div
-                      className="bg-blue-600 h-full transition-all duration-500 ease-out"
-                      style={{
-                        width: `${((loadingStageIndex + 1) / LOADING_STAGES.length) * 100}%`,
-                      }}
-                    />
-                  </div>
-                  <div className="text-[10px] text-slate-400 flex justify-between font-mono">
-                    <span>TACTICAL RETRIEVAL</span>
-                    <span>STAGE {loadingStageIndex + 1}/{LOADING_STAGES.length}</span>
-                  </div>
+                <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-700 flex items-center gap-2.5 shadow-2xs">
+                  <Sparkles size={14} className="text-blue-600 animate-spin shrink-0" />
+                  <span className="text-slate-700 font-medium">SkyTrace Assistant is thinking...</span>
                 </div>
               </div>
             )}
@@ -458,17 +431,22 @@ export default function SkyTraceChatPage() {
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 placeholder="Ask about active cyclone alerts, flash floods, or localized weather warnings..."
-                className="flex-1 bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="flex-1 bg-white border border-slate-300 rounded-lg px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 shadow-2xs transition-all"
+                disabled={loading}
               />
               <button
                 type="submit"
                 disabled={!inputText.trim() || loading}
-                className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2.5 text-xs font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-50 shadow-xs"
+                className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 text-white disabled:text-slate-400 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs disabled:cursor-not-allowed shrink-0"
               >
-                <Send size={14} />
+                <Send size={13} />
                 <span>Send</span>
               </button>
             </form>
+            <div className="mt-1.5 flex items-center justify-between text-[10px] text-slate-400 px-1">
+              <span>Enter a district name, hazard category, or incident ID</span>
+              <span className="font-mono">NDMA • IMD TACTICAL DEFENSE</span>
+            </div>
           </div>
         </div>
       </main>

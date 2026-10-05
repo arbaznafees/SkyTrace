@@ -4,6 +4,10 @@ SkyTrace Main FastAPI Application
 Tactical disaster weather verification platform backend.
 """
 
+import sys
+if "ujson" not in sys.modules:
+    sys.modules["ujson"] = None
+
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 import os
