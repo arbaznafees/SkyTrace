@@ -106,6 +106,23 @@ export const GisRadarCanvas: React.FC<GisRadarCanvasProps> = ({
     };
   }, []);
 
+  // Handle container resizing (e.g., when EventDetailDrawer opens/closes or window resizes)
+  useEffect(() => {
+    if (!mapReady || !mapContainerRef.current) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
+      }
+    });
+
+    resizeObserver.observe(mapContainerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [mapReady]);
+
   // Update map markers when events, selectedEvent, or mapReady change
   useEffect(() => {
     if (!mapReady || !mapInstanceRef.current || !markersLayerRef.current) return;
@@ -179,6 +196,7 @@ export const GisRadarCanvas: React.FC<GisRadarCanvasProps> = ({
       });
 
       if (selectedEvent) {
+        mapInstanceRef.current.invalidateSize();
         mapInstanceRef.current.setView(
           [selectedEvent.latitude, selectedEvent.longitude],
           8,
@@ -189,7 +207,7 @@ export const GisRadarCanvas: React.FC<GisRadarCanvasProps> = ({
   }, [events, selectedEvent, onSelectEvent, mapReady]);
 
   return (
-    <div className="relative flex-1 h-full min-h-[400px] bg-slate-200 overflow-hidden">
+    <div className="relative flex-1 h-full min-h-[220px] md:min-h-[400px] bg-slate-200 overflow-hidden">
       {/* Map Container */}
       <div ref={mapContainerRef} className="w-full h-full" />
 

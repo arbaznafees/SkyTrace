@@ -358,23 +358,32 @@ export default function DashboardPage() {
 
           {/* Viewport Logic */}
           <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden w-full h-full">
-            {/* GIS Radar Canvas */}
+            {/* GIS Radar Canvas & Selected Event Information Container */}
             <div
               className={`flex-1 ${
-                mobilePane === "canvas" ? "flex" : "hidden xl:flex"
-              } h-full min-h-0 flex-col overflow-hidden relative`}
+                mobilePane === "canvas" || selectedEvent ? "flex" : "hidden xl:flex"
+              } h-full min-h-0 flex-col md:flex-row overflow-hidden relative`}
             >
-              <GisRadarCanvas
-                events={displayedEvents}
-                selectedEvent={selectedEvent}
-                onSelectEvent={setSelectedEvent}
+              <div className="flex-1 h-full min-h-0 flex flex-col overflow-hidden relative">
+                <GisRadarCanvas
+                  events={displayedEvents}
+                  selectedEvent={selectedEvent}
+                  onSelectEvent={setSelectedEvent}
+                />
+              </div>
+
+              {/* Event Information / Details Panel */}
+              <EventDetailDrawer
+                event={selectedEvent}
+                onClose={() => setSelectedEvent(null)}
+                onTriageUpdate={handleTriageUpdate}
               />
             </div>
 
             {/* Right Pane: Live Ground Truth Event Stream */}
             <div
               className={`w-full xl:w-96 ${
-                mobilePane === "stream" ? "flex" : "hidden xl:flex"
+                mobilePane === "stream" && !selectedEvent ? "flex" : "hidden xl:flex"
               } flex-1 md:flex-initial h-full min-h-0 flex-col overflow-hidden`}
             >
               <LiveEventStream
@@ -458,13 +467,6 @@ export default function DashboardPage() {
           <span>Review</span>
         </Link>
       </nav>
-
-      {/* Slide-Over Incident Detail Drawer */}
-      <EventDetailDrawer
-        event={selectedEvent}
-        onClose={() => setSelectedEvent(null)}
-        onTriageUpdate={handleTriageUpdate}
-      />
     </div>
   );
 }

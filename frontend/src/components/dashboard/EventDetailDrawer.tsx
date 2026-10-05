@@ -114,7 +114,7 @@ export const EventDetailDrawer: React.FC<EventDetailDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-0 md:inset-x-auto md:inset-y-0 md:right-0 z-50 w-full md:w-[460px] max-h-[85vh] md:max-h-full bg-white border-t md:border-t-0 md:border-l border-slate-300 shadow-2xl flex flex-col h-auto md:h-full overflow-hidden">
+    <div className="w-full md:w-[380px] lg:w-[400px] xl:w-[420px] 2xl:w-[440px] shrink-0 h-auto max-h-[50vh] md:max-h-full md:h-full bg-white border-t md:border-t-0 md:border-l border-slate-300 shadow-xl flex flex-col overflow-hidden">
       {/* Drawer Header */}
       <div className="px-4 py-3 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
         <div className="flex items-center gap-2.5">
