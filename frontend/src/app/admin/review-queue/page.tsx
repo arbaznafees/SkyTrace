@@ -20,7 +20,6 @@ import {
   ChevronDown,
   ChevronUp,
   Send,
-  Radio,
   FileCheck,
   RotateCw,
   ShieldCheck,
@@ -70,7 +69,7 @@ export default function AdminReviewQueuePage() {
     noiseFloorSuppressionPct: 78.4,
   });
 
-  // Strict route guard: redirect unauthenticated users to /login and non-admins to /dashboard
+  // Strict route guard
   useEffect(() => {
     if (!authLoading) {
       if (!user) {
@@ -289,15 +288,15 @@ export default function AdminReviewQueuePage() {
 
   const activeInspectedEvent = events.find((e) => e.id === expandedEventId);
 
-  // Render access guard screen while verifying clearance or redirecting non-admins
+  // Render access guard screen
   if (authLoading || !user || !isAdmin) {
     return (
       <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-xl shadow-lg border border-slate-200 p-6 text-center space-y-4">
-          <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mx-auto">
-            <Lock size={22} />
+        <div className="max-w-md w-full bg-white rounded border border-slate-300 p-6 text-center space-y-3 shadow-md">
+          <div className="w-10 h-10 rounded bg-slate-900 text-amber-400 flex items-center justify-center mx-auto">
+            <Lock size={18} />
           </div>
-          <h2 className="text-base font-bold text-slate-800">
+          <h2 className="text-sm font-bold text-slate-900 font-mono uppercase tracking-wide">
             {authLoading ? "Verifying Tactical Credentials..." : "NDMA Admin Clearance Required"}
           </h2>
           <p className="text-xs text-slate-600">
@@ -305,8 +304,8 @@ export default function AdminReviewQueuePage() {
               ? "Validating encrypted session clearance with SkyTrace gateway..."
               : "Access to the Review Queue is restricted to NDMA Administrators. Redirecting to Operations Dashboard..."}
           </p>
-          <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-            <div className="bg-blue-600 h-full w-2/3 animate-pulse rounded-full"></div>
+          <div className="w-full bg-slate-100 h-1 rounded overflow-hidden">
+            <div className="bg-blue-600 h-full w-2/3 animate-pulse"></div>
           </div>
         </div>
       </div>
@@ -317,8 +316,8 @@ export default function AdminReviewQueuePage() {
     <div className="min-h-screen bg-slate-100 flex flex-col antialiased text-slate-900 font-sans pb-24">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-20 right-6 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-lg shadow-xl text-xs font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-top-4 duration-150">
-          <CheckCircle2 size={16} className="text-emerald-400" />
+        <div className="fixed top-16 right-6 z-50 bg-slate-900 text-white px-3.5 py-2 rounded shadow-xl text-xs font-mono font-semibold flex items-center gap-2 border border-slate-700">
+          <CheckCircle2 size={14} className="text-emerald-400" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -327,22 +326,22 @@ export default function AdminReviewQueuePage() {
       <TacticalHeader stats={stats} />
 
       {/* Main Operations Matrix Layout */}
-      <div className="flex-1 flex pt-24">
+      <div className="flex-1 flex pt-[84px]">
         {/* Left Rail (Desktop) */}
         <TacticalRail pendingReviewCount={stats?.pendingCount ?? 0} />
 
         {/* Center Main Content Area */}
-        <main className="flex-1 pl-0 xl:pl-64 p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-6">
+        <main className="flex-1 pl-0 xl:pl-60 p-4 sm:p-5 max-w-7xl mx-auto w-full space-y-4">
           {/* Header & Mission Breadcrumb */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-300">
             <div>
-              <div className="text-xs font-semibold text-blue-700 uppercase tracking-wide">
-                Disaster Verification Triage
+              <div className="text-[10px] font-mono font-bold text-blue-700 uppercase tracking-widest">
+                Disaster Verification Triage Matrix
               </div>
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              <h1 className="text-xl font-bold text-slate-900 tracking-tight">
                 Review & Incident Triage Queue
               </h1>
-              <p className="text-xs text-slate-600 mt-0.5">
+              <p className="text-xs text-slate-600">
                 Human verification for borderline AI confidence alerts, sensor conflicts, and severe hazard escalations.
               </p>
             </div>
@@ -350,85 +349,94 @@ export default function AdminReviewQueuePage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={fetchEvents}
-                className="px-3 py-1.5 bg-white text-slate-700 hover:text-slate-900 border border-slate-300 rounded-md text-xs font-semibold flex items-center gap-1.5 shadow-2xs hover:bg-slate-50 transition-colors"
+                className="px-2.5 py-1.5 bg-white text-slate-800 hover:text-slate-900 border border-slate-300 rounded text-xs font-semibold flex items-center gap-1.5 shadow-2xs hover:bg-slate-50 transition-colors"
               >
-                <RotateCw size={13} className={loading ? "animate-spin text-blue-600" : ""} />
+                <RotateCw size={12} className={loading ? "animate-spin text-blue-600" : ""} />
                 <span>Refresh Queue</span>
               </button>
             </div>
           </div>
 
           {/* 4 Metric Bento Panels */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-            <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-2xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="bg-white p-3 rounded border border-slate-300 shadow-2xs">
               <div className="flex items-center justify-between text-slate-500 text-xs font-medium mb-1">
-                <span>Response Velocity</span>
-                <Clock size={15} className="text-blue-600" />
+                <span className="text-[10px] font-mono font-bold uppercase">Response Velocity</span>
+                <Clock size={13} className="text-blue-600" />
               </div>
-              <div className="text-2xl font-bold text-slate-900 tabular-nums">
-                {queueMetrics.responseVelocitySeconds.toFixed(1)}s
+              <div className="text-2xl font-mono font-bold text-slate-900 tabular-nums">
+                {(() => {
+                  const s = queueMetrics.responseVelocitySeconds;
+                  if (s < 60) return `${s.toFixed(1)}s`;
+                  const m = Math.floor(s / 60);
+                  const remS = Math.round(s % 60);
+                  if (m < 60) return `${m}m ${remS}s`;
+                  const h = Math.floor(m / 60);
+                  const remM = m % 60;
+                  return `${h}h ${remM}m`;
+                })()}
               </div>
-              <div className="text-[11px] text-slate-500 mt-1">
+              <div className="text-[10px] text-slate-500 mt-0.5">
                 Avg time to verification decision
               </div>
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-2xs">
+            <div className="bg-white p-3 rounded border border-slate-300 shadow-2xs">
               <div className="flex items-center justify-between text-slate-500 text-xs font-medium mb-1">
-                <span>Triage Sample Size</span>
-                <Layers size={15} className="text-amber-500" />
+                <span className="text-[10px] font-mono font-bold uppercase">Triage Sample Size</span>
+                <Layers size={13} className="text-amber-600" />
               </div>
-              <div className="text-2xl font-bold text-slate-900 tabular-nums">
+              <div className="text-2xl font-mono font-bold text-slate-900 tabular-nums">
                 N = {queueMetrics.triageSampleSize}
               </div>
-              <div className="text-[11px] text-slate-500 mt-1">
+              <div className="text-[10px] text-slate-500 mt-0.5">
                 Recent verified calibration batch
               </div>
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-2xs">
+            <div className="bg-white p-3 rounded border border-slate-300 shadow-2xs">
               <div className="flex items-center justify-between text-slate-500 text-xs font-medium mb-1">
-                <span>Auto-Approval Rate</span>
-                <ShieldCheck size={15} className="text-emerald-600" />
+                <span className="text-[10px] font-mono font-bold uppercase">Auto-Approval Rate</span>
+                <ShieldCheck size={13} className="text-emerald-600" />
               </div>
-              <div className="text-2xl font-bold text-emerald-700 tabular-nums">
+              <div className="text-2xl font-mono font-bold text-emerald-700 tabular-nums">
                 {queueMetrics.verificationRatePct.toFixed(1)}%
               </div>
-              <div className="text-[11px] text-slate-500 mt-1">
+              <div className="text-[10px] text-slate-500 mt-0.5">
                 Model confidence gate compliance
               </div>
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-2xs">
+            <div className="bg-white p-3 rounded border border-slate-300 shadow-2xs">
               <div className="flex items-center justify-between text-slate-500 text-xs font-medium mb-1">
-                <span>Noise Suppression</span>
-                <FileCheck size={15} className="text-blue-600" />
+                <span className="text-[10px] font-mono font-bold uppercase">Noise Suppression</span>
+                <FileCheck size={13} className="text-blue-600" />
               </div>
-              <div className="text-2xl font-bold text-blue-700 tabular-nums">
+              <div className="text-2xl font-mono font-bold text-blue-700 tabular-nums">
                 {queueMetrics.noiseFloorSuppressionPct.toFixed(1)}%
               </div>
-              <div className="text-[11px] text-slate-500 mt-1">
+              <div className="text-[10px] text-slate-500 mt-0.5">
                 Duplicate & noise reports filtered
               </div>
             </div>
           </div>
 
           {/* Filter Tab Bar */}
-          <div className="bg-white p-2 rounded-lg border border-slate-200 flex flex-wrap items-center justify-between gap-2 shadow-2xs">
+          <div className="bg-white p-2 rounded border border-slate-300 flex flex-wrap items-center justify-between gap-2 shadow-2xs">
             <div className="flex flex-wrap items-center gap-1.5">
               <button
                 onClick={() => setActiveTab("all")}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors flex items-center gap-1.5 ${
+                className={`px-3 py-1 text-xs font-semibold rounded transition-colors flex items-center gap-1.5 font-mono ${
                   activeTab === "all"
-                    ? "bg-blue-600 text-white shadow-2xs"
+                    ? "bg-slate-900 text-white shadow-2xs"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                 }`}
               >
                 <span>Awaiting Review</span>
                 <span
-                  className={`px-1.5 py-0.2 text-[10px] font-bold rounded-full ${
+                  className={`px-1.5 py-0.2 text-[10px] font-bold rounded ${
                     activeTab === "all"
-                      ? "bg-white text-blue-700"
+                      ? "bg-slate-800 text-white"
                       : "bg-slate-200 text-slate-700"
                   }`}
                 >
@@ -438,18 +446,18 @@ export default function AdminReviewQueuePage() {
 
               <button
                 onClick={() => setActiveTab("severe")}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors flex items-center gap-1.5 ${
+                className={`px-3 py-1 text-xs font-semibold rounded transition-colors flex items-center gap-1.5 font-mono ${
                   activeTab === "severe"
-                    ? "bg-rose-600 text-white shadow-2xs"
+                    ? "bg-rose-700 text-white shadow-2xs"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                 }`}
               >
-                <AlertTriangle size={13} />
+                <AlertTriangle size={12} />
                 <span>High Severity</span>
                 <span
-                  className={`px-1.5 py-0.2 text-[10px] font-bold rounded-full ${
+                  className={`px-1.5 py-0.2 text-[10px] font-bold rounded ${
                     activeTab === "severe"
-                      ? "bg-white text-rose-700"
+                      ? "bg-rose-900 text-white"
                       : "bg-rose-100 text-rose-800"
                   }`}
                 >
@@ -459,9 +467,9 @@ export default function AdminReviewQueuePage() {
 
               <button
                 onClick={() => setActiveTab("conflict")}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors flex items-center gap-1.5 ${
+                className={`px-3 py-1 text-xs font-semibold rounded transition-colors flex items-center gap-1.5 font-mono ${
                   activeTab === "conflict"
-                    ? "bg-blue-600 text-white shadow-2xs"
+                    ? "bg-slate-900 text-white shadow-2xs"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                 }`}
               >
@@ -470,9 +478,9 @@ export default function AdminReviewQueuePage() {
 
               <button
                 onClick={() => setActiveTab("citizen")}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors flex items-center gap-1.5 ${
+                className={`px-3 py-1 text-xs font-semibold rounded transition-colors flex items-center gap-1.5 font-mono ${
                   activeTab === "citizen"
-                    ? "bg-blue-600 text-white shadow-2xs"
+                    ? "bg-slate-900 text-white shadow-2xs"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                 }`}
               >
@@ -480,20 +488,20 @@ export default function AdminReviewQueuePage() {
               </button>
             </div>
 
-            <div className="text-xs text-slate-500 font-medium px-2">
+            <div className="text-[11px] font-mono text-slate-500 font-medium px-2">
               Showing {filteredEvents.length} items
             </div>
           </div>
 
           {/* High-Density Triage Event Stream */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             {loading ? (
-              <div className="p-12 text-center text-slate-500 bg-white rounded-lg border border-slate-200 flex items-center justify-center gap-2 text-xs font-medium">
-                <RotateCw size={16} className="animate-spin text-blue-600" />
+              <div className="p-8 text-center text-slate-500 bg-white rounded border border-slate-300 flex items-center justify-center gap-2 text-xs font-medium font-mono">
+                <RotateCw size={14} className="animate-spin text-blue-600" />
                 <span>Loading queue items...</span>
               </div>
             ) : filteredEvents.length === 0 ? (
-              <div className="p-12 text-center text-slate-500 bg-white rounded-lg border border-slate-200 text-xs font-medium">
+              <div className="p-8 text-center text-slate-500 bg-white rounded border border-slate-300 text-xs font-medium font-mono">
                 No active incidents currently awaiting review in this view.
               </div>
             ) : (
@@ -501,71 +509,71 @@ export default function AdminReviewQueuePage() {
                 const isSelected = selectedIds.includes(evt.id);
                 const isExpanded = expandedEventId === evt.id;
 
-                let borderLeftClass = "border-l-4 border-l-amber-500";
+                let borderLeftClass = "border-l-3 border-l-amber-500";
                 if (evt.severity === "severe") {
-                  borderLeftClass = "border-l-4 border-l-rose-500";
+                  borderLeftClass = "border-l-3 border-l-rose-600";
                 } else if (evt.verification_status === "verified") {
-                  borderLeftClass = "border-l-4 border-l-emerald-500";
+                  borderLeftClass = "border-l-3 border-l-emerald-600";
                 }
 
                 return (
                   <div
                     key={evt.id}
-                    className={`bg-white rounded-lg p-4 border border-slate-200 shadow-2xs flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between transition-colors ${borderLeftClass} ${
-                      isSelected ? "ring-2 ring-blue-500 bg-blue-50/20" : ""
+                    className={`bg-white rounded p-3 border border-slate-300 shadow-2xs flex flex-col lg:flex-row gap-3 items-start lg:items-center justify-between transition-colors ${borderLeftClass} ${
+                      isSelected ? "ring-2 ring-blue-600 bg-blue-50/20" : ""
                     }`}
                   >
                     {/* Left: Checkbox, Code, Severity, Time */}
-                    <div className="flex items-start gap-3 min-w-[240px]">
+                    <div className="flex items-start gap-2.5 min-w-[220px]">
                       <input
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => handleToggleSelect(evt.id)}
-                        className="mt-1 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                        className="mt-0.5 w-3.5 h-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                       />
                       <div className="flex flex-col">
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-sm font-bold text-slate-900">
+                          <span className="font-mono text-xs font-bold text-slate-900">
                             {evt.event_code}
                           </span>
                           <span
-                            className={`px-1.5 py-0.2 rounded text-[10px] uppercase font-bold ${
+                            className={`px-1.5 py-0.2 rounded font-mono text-[9px] uppercase font-bold ${
                               evt.severity === "severe"
-                                ? "bg-rose-100 text-rose-800"
-                                : "bg-amber-100 text-amber-800"
+                                ? "bg-rose-100 text-rose-900 border border-rose-300"
+                                : "bg-amber-100 text-amber-900 border border-amber-300"
                             }`}
                           >
                             {evt.severity === "severe" ? "Severe" : "Review Req"}
                           </span>
                         </div>
-                        <span className="text-xs text-slate-500 mt-0.5">
+                        <span className="text-[10px] text-slate-500 font-mono mt-0.5">
                           {new Date(evt.last_updated_at).toUTCString().slice(17, 22)} UTC
                         </span>
-                        <div className="flex items-center gap-1 text-slate-500 text-[11px] mt-1 font-medium">
-                          <Satellite size={12} className="text-blue-600" />
+                        <div className="flex items-center gap-1 text-slate-500 text-[10px] mt-0.5 font-mono">
+                          <Satellite size={11} className="text-blue-600" />
                           <span>DWR IMD • {evt.district}</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Center: Title, Location, Trust Breakdown */}
-                    <div className="flex-1 flex flex-col gap-1.5 min-w-0">
+                    <div className="flex-1 flex flex-col gap-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-xs sm:text-sm font-bold text-slate-900">
+                        <h3 className="text-xs font-bold text-slate-900">
                           {evt.headline}
                         </h3>
                         <span className="text-slate-300">•</span>
-                        <span className="text-xs text-slate-600 flex items-center gap-1 font-medium">
-                          <MapPin size={12} className="text-slate-400" />
+                        <span className="text-[11px] text-slate-600 flex items-center gap-1 font-medium">
+                          <MapPin size={11} className="text-slate-400" />
                           {evt.location_name} ({evt.latitude.toFixed(4)}° N,{" "}
                           {evt.longitude.toFixed(4)}° E)
                         </span>
                       </div>
 
                       {/* Trust Breakdown Strip */}
-                      <div className="flex flex-wrap items-center gap-3 text-xs bg-slate-50 px-3 py-1.5 rounded-md border border-slate-200">
+                      <div className="flex flex-wrap items-center gap-2.5 text-[11px] bg-slate-50 px-2.5 py-1 rounded border border-slate-200 font-mono">
                         <div className="flex items-center gap-1">
-                          <span className="text-slate-500 font-medium">Trust Score:</span>
+                          <span className="text-slate-500">Trust:</span>
                           <span
                             className={`font-bold tabular-nums ${
                               evt.trust_score >= 0.7
@@ -578,14 +586,11 @@ export default function AdminReviewQueuePage() {
                         </div>
                         <span className="text-slate-300">•</span>
                         <div className="text-slate-600">
-                          Corroboration:{" "}
-                          <span className="font-semibold text-slate-900">
-                            {evt.report_count} reports
-                          </span>
+                          Reports: <span className="font-semibold text-slate-900">{evt.report_count}</span>
                         </div>
                         <span className="text-slate-300">•</span>
                         <div className="text-slate-600">
-                          Media Proof:{" "}
+                          Media:{" "}
                           <span className="font-semibold text-slate-900">
                             {evt.has_verifiable_media ? "Verified Exif" : "Sensor Only"}
                           </span>
@@ -593,8 +598,8 @@ export default function AdminReviewQueuePage() {
                       </div>
 
                       {/* Conflict Note */}
-                      <div className="flex items-start gap-1.5 text-amber-800 text-xs bg-amber-50/80 px-2.5 py-1 rounded border border-amber-200">
-                        <AlertTriangle size={13} className="text-amber-600 shrink-0 mt-0.5" />
+                      <div className="flex items-start gap-1.5 text-amber-900 text-[11px] bg-amber-50 px-2 py-0.5 rounded border border-amber-300">
+                        <AlertTriangle size={12} className="text-amber-600 shrink-0 mt-0.5" />
                         <span className="leading-snug">
                           <strong>Triage Note:</strong>{" "}
                           {evt.conflict_note ||
@@ -604,24 +609,24 @@ export default function AdminReviewQueuePage() {
                     </div>
 
                     {/* Right: Operational Decision Buttons */}
-                    <div className="flex items-center gap-2 self-stretch lg:self-center justify-end shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
+                    <div className="flex items-center gap-1.5 self-stretch lg:self-center justify-end shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
                       <button
                         onClick={() => handleSingleTriage(evt.id, "verify")}
                         disabled={actionInProgress === evt.id}
-                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-md flex items-center gap-1.5 shadow-2xs transition-colors disabled:opacity-50"
+                        className="px-2.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded flex items-center gap-1 shadow-2xs transition-colors disabled:opacity-50 font-mono"
                         title="Approve immediately to civilian warning grid"
                       >
-                        <Check size={14} />
+                        <Check size={13} />
                         <span>Approve</span>
                       </button>
 
                       <button
                         onClick={() => handleSingleTriage(evt.id, "reject")}
                         disabled={actionInProgress === evt.id}
-                        className="px-3 py-1.5 bg-white hover:bg-rose-50 text-rose-700 border border-rose-300 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                        className="px-2.5 py-1 bg-white hover:bg-rose-50 text-rose-700 border border-rose-300 text-xs font-semibold rounded flex items-center gap-1 transition-colors disabled:opacity-50 font-mono"
                         title="Dismiss as false report / noise"
                       >
-                        <X size={14} />
+                        <X size={13} />
                         <span>Reject</span>
                       </button>
 
@@ -629,7 +634,7 @@ export default function AdminReviewQueuePage() {
                         onClick={() =>
                           setExpandedEventId(isExpanded ? null : evt.id)
                         }
-                        className={`p-1.5 rounded-md border text-xs font-semibold transition-colors ${
+                        className={`p-1 rounded border text-xs font-semibold transition-colors ${
                           isExpanded
                             ? "bg-slate-200 text-slate-900 border-slate-300"
                             : "bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border-slate-300"
@@ -637,9 +642,9 @@ export default function AdminReviewQueuePage() {
                         title="Toggle Detailed Drilldown"
                       >
                         {isExpanded ? (
-                          <ChevronUp size={16} />
+                          <ChevronUp size={14} />
                         ) : (
-                          <ChevronDown size={16} />
+                          <ChevronDown size={14} />
                         )}
                       </button>
                     </div>
@@ -651,10 +656,10 @@ export default function AdminReviewQueuePage() {
 
           {/* Deep Inspection Panel */}
           {activeInspectedEvent && (
-            <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
-                <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
-                  <BarChart3 size={16} className="text-blue-600" />
+            <div className="bg-white p-4 rounded border border-slate-300 shadow-xs space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-900 font-mono uppercase">
+                  <BarChart3 size={15} className="text-blue-600" />
                   <span>
                     Detailed Inspection • {activeInspectedEvent.event_code}
                   </span>
@@ -662,22 +667,22 @@ export default function AdminReviewQueuePage() {
                     ({activeInspectedEvent.district}, {activeInspectedEvent.state})
                   </span>
                 </div>
-                <div className="text-xs text-slate-500">
+                <div className="text-[11px] font-mono text-slate-500">
                   INSAT-3D Doppler Corroboration Active
                 </div>
               </div>
 
               {/* Sensor & Citizen Evidence Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                 {/* Radar Reflectivity Card */}
-                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-2">
-                  <div className="flex justify-between items-center font-semibold text-slate-900">
+                <div className="bg-slate-50 p-3 rounded border border-slate-200 space-y-1.5 font-mono text-[11px]">
+                  <div className="flex justify-between items-center font-bold text-slate-900 font-sans">
                     <span>Radar Reflectivity & Telemetry</span>
-                    <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 text-[11px]">
+                    <span className="text-emerald-800 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-300 text-[10px]">
                       Correlated
                     </span>
                   </div>
-                  <div className="text-slate-600 space-y-1">
+                  <div className="text-slate-600 space-y-0.5">
                     <div>Location: {activeInspectedEvent.location_name}</div>
                     <div>District: {activeInspectedEvent.district}</div>
                     <div>Surface Rain Rate: 48 mm / hr</div>
@@ -686,14 +691,14 @@ export default function AdminReviewQueuePage() {
                 </div>
 
                 {/* Citizen Evidence Card */}
-                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-2">
-                  <div className="flex justify-between items-center font-semibold text-slate-900">
+                <div className="bg-slate-50 p-3 rounded border border-slate-200 space-y-1.5 font-mono text-[11px]">
+                  <div className="flex justify-between items-center font-bold text-slate-900 font-sans">
                     <span>Ground Observer Evidence</span>
-                    <span className="text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 text-[11px]">
+                    <span className="text-blue-800 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-300 text-[10px]">
                       {activeInspectedEvent.report_count} Reports
                     </span>
                   </div>
-                  <div className="text-slate-600 space-y-1">
+                  <div className="text-slate-600 space-y-0.5">
                     <div>
                       Photo Upload:{" "}
                       {activeInspectedEvent.has_verifiable_media
@@ -706,9 +711,9 @@ export default function AdminReviewQueuePage() {
                         onClick={() =>
                           handleSingleTriage(activeInspectedEvent.id, "escalate")
                         }
-                        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs"
+                        className="px-2.5 py-1 bg-blue-700 hover:bg-blue-800 text-white rounded text-xs font-semibold flex items-center gap-1 transition-colors shadow-2xs font-mono"
                       >
-                        <Send size={13} />
+                        <Send size={12} />
                         <span>Escalate to NDMA Incident Desk</span>
                       </button>
                     </div>
@@ -721,9 +726,9 @@ export default function AdminReviewQueuePage() {
       </div>
 
       {/* Sticky Bottom Batch Action Bar */}
-      <div className="fixed bottom-0 left-0 xl:left-64 right-0 z-40 bg-white px-4 sm:px-6 py-3 border-t border-slate-200 shadow-xl flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-4">
-          <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer text-slate-800 select-none">
+      <div className="fixed bottom-0 left-0 xl:left-60 right-0 z-40 bg-white px-4 sm:px-6 py-2.5 border-t border-slate-300 shadow-xl flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer text-slate-800 select-none font-mono">
             <input
               type="checkbox"
               checked={
@@ -731,12 +736,12 @@ export default function AdminReviewQueuePage() {
                 selectedIds.length === filteredEvents.length
               }
               onChange={(e) => handleSelectAll(e.target.checked)}
-              className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              className="w-3.5 h-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
             />
             <span>Select All ({filteredEvents.length})</span>
           </label>
           <span className="text-slate-300">|</span>
-          <div className="text-xs text-slate-600">
+          <div className="text-xs text-slate-600 font-mono">
             Selected:{" "}
             <span className="font-bold text-blue-700">{selectedIds.length}</span>{" "}
             events
@@ -747,18 +752,18 @@ export default function AdminReviewQueuePage() {
           <button
             onClick={() => handleBatchAction("verify")}
             disabled={!isAdmin || selectedIds.length === 0 || actionInProgress === "batch"}
-            className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-md flex items-center gap-1.5 shadow-2xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3 py-1 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded flex items-center gap-1 shadow-2xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-mono"
           >
-            <Check size={14} />
+            <Check size={13} />
             <span>Approve Selected ({selectedIds.length})</span>
           </button>
 
           <button
             onClick={() => handleBatchAction("reject")}
             disabled={!isAdmin || selectedIds.length === 0 || actionInProgress === "batch"}
-            className="px-3.5 py-1.5 bg-white hover:bg-rose-50 text-rose-700 border border-rose-300 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3 py-1 bg-white hover:bg-rose-50 text-rose-700 border border-rose-300 text-xs font-semibold rounded flex items-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-mono shadow-2xs"
           >
-            <X size={14} />
+            <X size={13} />
             <span>Reject Selected ({selectedIds.length})</span>
           </button>
 
@@ -772,9 +777,9 @@ export default function AdminReviewQueuePage() {
               }
             }}
             disabled={!isAdmin || selectedIds.length === 0}
-            className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-md flex items-center gap-1.5 shadow-2xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3 py-1 bg-blue-700 hover:bg-blue-800 text-white text-xs font-semibold rounded flex items-center gap-1 shadow-2xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-mono"
           >
-            <Send size={14} />
+            <Send size={12} />
             <span>Escalate ({selectedIds.length})</span>
           </button>
         </div>

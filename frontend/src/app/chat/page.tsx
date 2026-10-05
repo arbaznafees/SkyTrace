@@ -13,24 +13,23 @@ import {
   Map,
   FilePlus,
   Sparkles,
-  Clock,
-  Radio,
   ExternalLink,
   ShieldCheck,
+  Radio,
+  Layers,
+  Database,
+  Satellite,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 function normalizeMarkdown(text: string): string {
   if (!text) return "";
-  // Unescape backslash-escaped markdown formatting characters (*, _, #, [, ], (, ))
-  // Leaves legitimate backslashes, code blocks, URLs, JSON, and math intact
   return text.replace(/\\([*_#[\]()])/g, "$1");
 }
 
 function isExternalUrl(href?: string): boolean {
   if (!href) return false;
-  // Relative links and hash anchors are always internal
   if (href.startsWith("/") || href.startsWith("#") || href.startsWith("?") || href.startsWith("./") || href.startsWith("../")) {
     return false;
   }
@@ -161,7 +160,6 @@ export default function SkyTraceChatPage() {
 
         setMessages((prev) => [...prev, replyMsg]);
       } else {
-        // Clean error response without fabricated data
         setMessages((prev) => [
           ...prev,
           {
@@ -193,232 +191,336 @@ export default function SkyTraceChatPage() {
     }
   };
 
+  // Collect all cited events across recent messages for the side Context panel
+  const allRecentSnippets: MapSnippet[] = [];
+  messages.forEach((m) => {
+    if (m.mapSnippets) {
+      m.mapSnippets.forEach((s) => {
+        if (!allRecentSnippets.find((x) => x.event_code === s.event_code)) {
+          allRecentSnippets.push(s);
+        }
+      });
+    }
+  });
+
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col antialiased text-slate-900 font-sans pb-4">
       {/* Header */}
       <TacticalHeader stats={stats} />
 
-      {/* Main Chat Interface */}
-      <main className="flex-1 pt-24 px-4 sm:px-6 max-w-4xl mx-auto w-full flex flex-col h-[calc(100vh-2rem)]">
-        {/* Chat Card Container */}
-        <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
-          {/* Chat Header */}
-          <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold">
-                <Bot size={18} />
+      {/* Main Operational Workspace */}
+      <main className="flex-1 pt-24 px-3 sm:px-6 max-w-7xl mx-auto w-full flex flex-col h-[calc(100vh-2rem)]">
+        {/* Workspace Card Container */}
+        <div className="flex-1 bg-white rounded border border-slate-300 shadow-xs flex flex-col overflow-hidden">
+          {/* Workspace Bar */}
+          <div className="px-4 py-2.5 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
+            <div className="flex items-center gap-2.5">
+              <div className="w-6 h-6 rounded bg-blue-600 flex items-center justify-center font-bold text-xs">
+                <Bot size={14} />
               </div>
               <div>
-                <h1 className="text-xs sm:text-sm font-bold text-slate-900">
+                <h1 className="text-xs sm:text-sm font-bold tracking-tight text-white font-mono uppercase">
                   SkyTrace Disaster Intelligence Copilot
                 </h1>
-                <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
-                  <span>Synthesizing live Doppler telemetry & crowdsourced reports</span>
+                <div className="text-[10px] text-slate-400 flex items-center gap-1.5 font-mono">
+                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+                  <span>INSAT-3D Doppler RAG Grounded</span>
                 </div>
               </div>
             </div>
             <Link
               href="/dashboard"
-              className="text-xs text-blue-700 hover:text-blue-900 font-semibold flex items-center gap-1"
+              className="text-xs text-blue-300 hover:text-white font-semibold flex items-center gap-1 font-mono"
             >
               <span>Operations Map</span>
               <ExternalLink size={12} />
             </Link>
           </div>
 
-          {/* Quick Prompt Pills */}
-          <div className="px-4 py-2 bg-slate-50/60 border-b border-slate-100 flex items-center gap-2 overflow-x-auto">
-            <span className="text-[11px] font-semibold text-slate-400 uppercase shrink-0">
+          {/* Quick Prompt Pills Bar */}
+          <div className="px-3.5 py-1.5 bg-slate-100 border-b border-slate-200 flex items-center gap-2 overflow-x-auto">
+            <span className="text-[10px] font-mono font-bold text-slate-500 uppercase shrink-0">
               Suggested Inquiries:
             </span>
             {QUICK_PROMPTS.map((prompt) => (
               <button
                 key={prompt}
                 onClick={() => handleSendMessage(prompt)}
-                className="px-2.5 py-1 text-xs bg-white hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 hover:border-blue-300 rounded-full transition-colors shrink-0 shadow-2xs"
+                className="px-2.5 py-0.5 text-[11px] bg-white hover:bg-slate-200 text-slate-700 hover:text-slate-900 border border-slate-300 rounded font-medium transition-colors shrink-0 shadow-2xs"
               >
                 {prompt}
               </button>
             ))}
           </div>
 
-          {/* Messages Stream */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
-            {messages.map((msg) => {
-              const isUser = msg.sender === "user";
-              return (
-                <div
-                  key={msg.id}
-                  className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}
-                >
-                  {!isUser && (
-                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 mt-0.5">
-                      <Bot size={16} />
-                    </div>
-                  )}
-
+          {/* Dual-Pane Layout: [Conversation Stream | Context & Data Sources] */}
+          <div className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden">
+            {/* Left/Main: Conversation Stream */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {messages.map((msg) => {
+                const isUser = msg.sender === "user";
+                return (
                   <div
-                    className={`max-w-[85%] sm:max-w-[75%] rounded-xl p-4 text-xs leading-relaxed space-y-2.5 ${
-                      isUser
-                        ? "bg-blue-600 text-white rounded-tr-none shadow-xs"
-                        : "bg-slate-50 text-slate-800 border border-slate-200 rounded-tl-none shadow-2xs"
-                    }`}
+                    key={msg.id}
+                    className={`flex gap-2.5 ${isUser ? "justify-end" : "justify-start"}`}
                   >
-                    {/* Timestamp & Engine Attribution */}
-                    <div
-                      className={`flex items-center justify-between text-[10px] pb-1 border-b ${
-                        isUser
-                          ? "border-blue-500 text-blue-100"
-                          : "border-slate-200 text-slate-400"
-                      }`}
-                    >
-                      <div className="flex items-center gap-1.5 font-semibold">
-                        <span>
-                          {isUser ? "Field Analyst / Observer" : msg.engine || "SkyTrace Copilot"}
-                        </span>
-                        {msg.ragUsed && (
-                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 bg-blue-100 text-blue-700 rounded text-[9px] font-medium border border-blue-200">
-                            <ShieldCheck size={10} />
-                            <span>Grounded Telemetry</span>
-                          </span>
-                        )}
-                      </div>
-                      <span>{msg.timestamp}</span>
-                    </div>
-
-                    {/* Message Body */}
-                    {isUser ? (
-                      <p className="whitespace-pre-line text-xs font-normal">
-                        {msg.text}
-                      </p>
-                    ) : (
-                      <div className="text-xs leading-relaxed space-y-2 text-slate-800 break-words">
-                        <ReactMarkdown
-                          remarkPlugins={[remarkGfm]}
-                          components={{
-                            p: ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
-                            h1: ({ children }) => <h1 className="text-sm font-bold text-slate-900 mt-2.5 mb-1">{children}</h1>,
-                            h2: ({ children }) => <h2 className="text-xs font-bold text-slate-900 mt-2 mb-1">{children}</h2>,
-                            h3: ({ children }) => <h3 className="text-xs font-semibold text-slate-900 mt-1.5 mb-0.5">{children}</h3>,
-                            strong: ({ children }) => <strong className="font-semibold text-slate-900">{children}</strong>,
-                            em: ({ children }) => <em className="italic">{children}</em>,
-                            ul: ({ children }) => <ul className="list-disc pl-4 space-y-1 my-1.5">{children}</ul>,
-                            ol: ({ children }) => <ol className="list-decimal pl-4 space-y-1 my-1.5">{children}</ol>,
-                            li: ({ children }) => <li className="leading-relaxed">{children}</li>,
-                            code: ({ children }) => (
-                              <code className="px-1.5 py-0.5 bg-slate-200/70 text-slate-900 rounded font-mono text-[11px]">
-                                {children}
-                              </code>
-                            ),
-                            a: ({ href, children }) => {
-                              const isExternal = isExternalUrl(href);
-                              return (
-                                <a
-                                  href={href}
-                                  target={isExternal ? "_blank" : undefined}
-                                  rel={isExternal ? "noopener noreferrer" : undefined}
-                                  className="text-blue-600 hover:text-blue-800 underline font-medium inline-flex items-center gap-0.5 transition-colors"
-                                >
-                                  <span>{children}</span>
-                                  {isExternal && <ExternalLink size={10} className="inline shrink-0" />}
-                                </a>
-                              );
-                            },
-                          }}
-                        >
-                          {normalizeMarkdown(msg.text)}
-                        </ReactMarkdown>
+                    {!isUser && (
+                      <div className="w-7 h-7 rounded bg-slate-800 text-blue-400 flex items-center justify-center shrink-0 mt-0.5 font-mono text-xs">
+                        <Bot size={14} />
                       </div>
                     )}
 
-                    {/* Attached Tactical Map Snippet Component (Rendered strictly when ragUsed is true) */}
-                    {msg.ragUsed && msg.mapSnippets && msg.mapSnippets.length > 0 && (
-                      <div className="mt-3 pt-2 border-t border-slate-200 space-y-2">
-                        {msg.mapSnippets.map((snippet) => {
-                          const normStatus = (snippet.verification_status || "").toLowerCase();
-                          const isVerified = normStatus === "verified";
-                          const isRejected = normStatus === "rejected";
-                          const borderColor = isVerified
-                            ? "border-l-emerald-500"
-                            : isRejected
-                            ? "border-l-rose-500"
-                            : "border-l-amber-500";
+                    <div
+                      className={`max-w-[85%] sm:max-w-[78%] rounded p-3 text-xs leading-relaxed space-y-2 ${
+                        isUser
+                          ? "bg-slate-900 text-white rounded-tr-none"
+                          : "bg-slate-50 text-slate-900 border border-slate-300 rounded-tl-none shadow-2xs"
+                      }`}
+                    >
+                      {/* Timestamp & Engine Attribution */}
+                      <div
+                        className={`flex items-center justify-between text-[10px] font-mono pb-1 border-b ${
+                          isUser
+                            ? "border-slate-700 text-slate-400"
+                            : "border-slate-200 text-slate-500"
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5 font-semibold">
+                          <span>
+                            {isUser ? "Field Analyst / Observer" : msg.engine || "SkyTrace Copilot"}
+                          </span>
+                          {msg.ragUsed && (
+                            <span className="inline-flex items-center gap-0.5 px-1 py-0.2 bg-blue-100 text-blue-900 rounded text-[9px] font-bold border border-blue-300">
+                              <ShieldCheck size={9} />
+                              <span>Grounded Telemetry</span>
+                            </span>
+                          )}
+                        </div>
+                        <span className="tabular-nums">{msg.timestamp}</span>
+                      </div>
 
-                          return (
-                            <div
-                              key={snippet.event_id}
-                              className={`bg-white rounded-lg p-3 border border-slate-200 shadow-xs border-l-4 ${borderColor} space-y-2`}
-                            >
-                              <div className="flex items-center justify-between">
-                                <span className="font-mono text-[11px] font-bold text-slate-900">
-                                  {snippet.event_code}
-                                </span>
-                                <VerificationBadge
-                                  status={snippet.verification_status || "pending"}
-                                  trustScore={snippet.trust_score}
-                                  size="sm"
-                                />
-                              </div>
-                              <div className="text-xs font-bold text-slate-900">
-                                {snippet.headline}
-                              </div>
-                              <div className="flex items-center gap-1 text-[11px] text-slate-500">
-                                <MapPin size={11} className="text-slate-400" />
-                                <span>
-                                  {snippet.location_name} • {snippet.district}, {snippet.state}
-                                </span>
-                              </div>
+                      {/* Message Body */}
+                      {isUser ? (
+                        <p className="whitespace-pre-line text-xs font-normal">
+                          {msg.text}
+                        </p>
+                      ) : (
+                        <div className="text-xs leading-relaxed space-y-2 text-slate-800 break-words">
+                          <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              p: ({ children }) => <p className="mb-1.5 last:mb-0 leading-relaxed">{children}</p>,
+                              h1: ({ children }) => <h1 className="text-sm font-bold text-slate-900 mt-2 mb-1">{children}</h1>,
+                              h2: ({ children }) => <h2 className="text-xs font-bold text-slate-900 mt-1.5 mb-0.5">{children}</h2>,
+                              h3: ({ children }) => <h3 className="text-xs font-semibold text-slate-900 mt-1 mb-0.5">{children}</h3>,
+                              strong: ({ children }) => <strong className="font-semibold text-slate-950">{children}</strong>,
+                              em: ({ children }) => <em className="italic">{children}</em>,
+                              ul: ({ children }) => <ul className="list-disc pl-4 space-y-0.5 my-1">{children}</ul>,
+                              ol: ({ children }) => <ol className="list-decimal pl-4 space-y-0.5 my-1">{children}</ol>,
+                              li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+                              code: ({ children }) => (
+                                <code className="px-1 py-0.2 bg-slate-200 text-slate-900 rounded font-mono text-[10px]">
+                                  {children}
+                                </code>
+                              ),
+                              a: ({ href, children }) => {
+                                const isExternal = isExternalUrl(href);
+                                return (
+                                  <a
+                                    href={href}
+                                    target={isExternal ? "_blank" : undefined}
+                                    rel={isExternal ? "noopener noreferrer" : undefined}
+                                    className="text-blue-700 hover:text-blue-900 underline font-medium inline-flex items-center gap-0.5 transition-colors"
+                                  >
+                                    <span>{children}</span>
+                                    {isExternal && <ExternalLink size={9} className="inline shrink-0" />}
+                                  </a>
+                                );
+                              },
+                            }}
+                          >
+                            {normalizeMarkdown(msg.text)}
+                          </ReactMarkdown>
+                        </div>
+                      )}
 
-                              {/* Deep Action Links */}
-                              <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
-                                <Link
-                                  href={`/dashboard?event=${snippet.event_code}`}
-                                  className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-[11px] font-semibold flex items-center gap-1 transition-colors shadow-2xs"
-                                >
-                                  <Map size={12} />
-                                  <span>View on GIS Tactical Canvas</span>
-                                </Link>
-                                <Link
-                                  href="/citizen-report"
-                                  className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[11px] font-semibold flex items-center gap-1 transition-colors border border-slate-200"
-                                >
-                                  <FilePlus size={12} />
-                                  <span>Report Ground Conditions Here</span>
-                                </Link>
+                      {/* Attached Tactical Map Snippet Component */}
+                      {msg.ragUsed && msg.mapSnippets && msg.mapSnippets.length > 0 && (
+                        <div className="mt-2.5 pt-2 border-t border-slate-200 space-y-2">
+                          <div className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider">
+                            Corroborated Incident Telemetry:
+                          </div>
+                          {msg.mapSnippets.map((snippet) => {
+                            const normStatus = (snippet.verification_status || "").toLowerCase();
+                            const isVerified = normStatus === "verified";
+                            const isRejected = normStatus === "rejected";
+                            const borderColor = isVerified
+                              ? "border-l-emerald-600"
+                              : isRejected
+                              ? "border-l-rose-600"
+                              : "border-l-amber-500";
+
+                            return (
+                              <div
+                                key={snippet.event_id}
+                                className={`bg-white rounded p-2.5 border border-slate-300 shadow-2xs border-l-3 ${borderColor} space-y-1.5`}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="font-mono text-xs font-bold text-slate-900">
+                                    {snippet.event_code}
+                                  </span>
+                                  <VerificationBadge
+                                    status={snippet.verification_status || "pending"}
+                                    trustScore={snippet.trust_score}
+                                    size="sm"
+                                  />
+                                </div>
+                                <div className="text-xs font-bold text-slate-900">
+                                  {snippet.headline}
+                                </div>
+                                <div className="flex items-center gap-1 text-[10px] text-slate-600 font-mono">
+                                  <MapPin size={10} className="text-slate-400" />
+                                  <span>
+                                    {snippet.location_name} • {snippet.district}, {snippet.state}
+                                  </span>
+                                </div>
+
+                                {/* Deep Action Links */}
+                                <div className="flex items-center gap-2 pt-1.5 border-t border-slate-100">
+                                  <Link
+                                    href={`/dashboard?event=${snippet.event_code}`}
+                                    className="px-2 py-0.5 bg-blue-700 hover:bg-blue-800 text-white rounded text-[10px] font-semibold flex items-center gap-1 transition-colors font-mono"
+                                  >
+                                    <Map size={11} />
+                                    <span>View on GIS Tactical Canvas</span>
+                                  </Link>
+                                  <Link
+                                    href="/citizen-report"
+                                    className="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[10px] font-semibold flex items-center gap-1 transition-colors border border-slate-300 font-mono"
+                                  >
+                                    <FilePlus size={11} />
+                                    <span>Report Ground Conditions Here</span>
+                                  </Link>
+                                </div>
                               </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {isUser && (
+                      <div className="w-7 h-7 rounded bg-slate-200 text-slate-800 flex items-center justify-center shrink-0 mt-0.5 font-mono text-xs">
+                        <User size={14} />
                       </div>
                     )}
                   </div>
+                );
+              })}
 
-                  {isUser && (
-                    <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center shrink-0 mt-0.5">
-                      <User size={16} />
+              {loading && (
+                <div className="flex gap-2.5">
+                  <div className="w-7 h-7 rounded bg-slate-800 text-blue-400 flex items-center justify-center shrink-0">
+                    <Bot size={14} />
+                  </div>
+                  <div className="bg-slate-50 border border-slate-300 rounded px-3 py-2 text-xs text-slate-700 flex items-center gap-2 shadow-2xs font-mono">
+                    <Sparkles size={12} className="text-blue-600 animate-spin shrink-0" />
+                    <span>SkyTrace Assistant is thinking...</span>
+                  </div>
+                </div>
+              )}
+              <div ref={chatBottomRef} />
+            </div>
+
+            {/* Right: Operational Context / Telemetry Sources Panel */}
+            <aside className="hidden lg:flex w-72 bg-slate-50 border-l border-slate-300 flex-col justify-between p-3.5 space-y-4 overflow-y-auto">
+              <div className="space-y-3.5">
+                <div className="border-b border-slate-200 pb-2">
+                  <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">
+                    Telemetry & Data Sources
+                  </div>
+                  <div className="text-xs font-bold text-slate-800 mt-0.5">
+                    Operational Grounding Status
+                  </div>
+                </div>
+
+                <div className="space-y-2 text-xs">
+                  <div className="bg-white p-2.5 rounded border border-slate-200 space-y-1">
+                    <div className="flex items-center justify-between font-mono text-[11px] font-bold text-slate-800">
+                      <span className="flex items-center gap-1.5">
+                        <Satellite size={12} className="text-blue-600" />
+                        INSAT-3D Doppler
+                      </span>
+                      <span className="text-emerald-700 text-[10px]">Active</span>
                     </div>
-                  )}
-                </div>
-              );
-            })}
+                    <p className="text-[10px] text-slate-500 leading-tight">
+                      DWR East Coast radar reflectivity & storm locus feeds synced.
+                    </p>
+                  </div>
 
-            {loading && (
-              <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
-                  <Bot size={16} />
+                  <div className="bg-white p-2.5 rounded border border-slate-200 space-y-1">
+                    <div className="flex items-center justify-between font-mono text-[11px] font-bold text-slate-800">
+                      <span className="flex items-center gap-1.5">
+                        <Database size={12} className="text-blue-600" />
+                        Ground Truth RAG
+                      </span>
+                      <span className="text-emerald-700 text-[10px]">Active</span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 leading-tight">
+                      Bayesian verified incidents cross-referenced for operational accuracy.
+                    </p>
+                  </div>
+
+                  <div className="bg-white p-2.5 rounded border border-slate-200 space-y-1">
+                    <div className="flex items-center justify-between font-mono text-[11px] font-bold text-slate-800">
+                      <span className="flex items-center gap-1.5">
+                        <Layers size={12} className="text-blue-600" />
+                        AI Verification
+                      </span>
+                      <span className="text-blue-700 font-mono text-[10px]">gemini-3.5-flash-lite</span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 leading-tight">
+                      Strict status-aware grounding: rejected events excluded from operational advice.
+                    </p>
+                  </div>
                 </div>
-                <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-700 flex items-center gap-2.5 shadow-2xs">
-                  <Sparkles size={14} className="text-blue-600 animate-spin shrink-0" />
-                  <span className="text-slate-700 font-medium">SkyTrace Assistant is thinking...</span>
-                </div>
+
+                {/* Cited Events in Session */}
+                {allRecentSnippets.length > 0 && (
+                  <div className="space-y-1.5 pt-2 border-t border-slate-200">
+                    <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">
+                      Referenced Incidents ({allRecentSnippets.length})
+                    </div>
+                    <div className="space-y-1">
+                      {allRecentSnippets.map((s) => (
+                        <Link
+                          key={s.event_code}
+                          href={`/dashboard?event=${s.event_code}`}
+                          className="block bg-white p-2 rounded border border-slate-200 hover:border-blue-400 transition-colors"
+                        >
+                          <div className="flex items-center justify-between text-[11px] font-mono font-bold text-slate-800">
+                            <span>{s.event_code}</span>
+                            <span className="text-[9px] uppercase font-bold text-slate-500">{s.severity}</span>
+                          </div>
+                          <div className="text-[10px] text-slate-600 truncate mt-0.5">
+                            {s.district}, {s.state}
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-            <div ref={chatBottomRef} />
+
+              <div className="p-2 bg-white rounded border border-slate-200 text-[10px] font-mono text-slate-500 space-y-0.5">
+                <div className="font-bold text-slate-700">Safety & ETA Rule</div>
+                <div>Estimates strictly derived from complete telemetry. No fabricated forecast times.</div>
+              </div>
+            </aside>
           </div>
 
           {/* Chat Input Console */}
-          <div className="p-3 bg-slate-50 border-t border-slate-200">
+          <div className="p-3 bg-slate-100 border-t border-slate-300">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -431,21 +533,21 @@ export default function SkyTraceChatPage() {
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 placeholder="Ask about active cyclone alerts, flash floods, or localized weather warnings..."
-                className="flex-1 bg-white border border-slate-300 rounded-lg px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 shadow-2xs transition-all"
+                className="flex-1 bg-white border border-slate-300 rounded px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-600 shadow-2xs"
                 disabled={loading}
               />
               <button
                 type="submit"
                 disabled={!inputText.trim() || loading}
-                className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 text-white disabled:text-slate-400 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs disabled:cursor-not-allowed shrink-0"
+                className="px-4 py-2 bg-blue-700 hover:bg-blue-800 disabled:bg-slate-300 text-white disabled:text-slate-500 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs disabled:cursor-not-allowed shrink-0 font-mono uppercase tracking-wider"
               >
-                <Send size={13} />
+                <Send size={12} />
                 <span>Send</span>
               </button>
             </form>
-            <div className="mt-1.5 flex items-center justify-between text-[10px] text-slate-400 px-1">
-              <span>Enter a district name, hazard category, or incident ID</span>
-              <span className="font-mono">NDMA • IMD TACTICAL DEFENSE</span>
+            <div className="mt-1 flex items-center justify-between text-[9px] text-slate-500 font-mono px-0.5">
+              <span>Query by district name, meteorological hazard, or incident code</span>
+              <span>NDMA • IMD TACTICAL OPERATIONAL COPILOT</span>
             </div>
           </div>
         </div>

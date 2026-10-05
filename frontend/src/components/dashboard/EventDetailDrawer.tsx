@@ -8,12 +8,10 @@ import { useAuth } from "@/context/AuthContext";
 import {
   X,
   MapPin,
-  AlertTriangle,
   CheckCircle2,
   XCircle,
   Radio,
   Send,
-  BarChart2,
   FileText,
   ShieldCheck,
   Lock,
@@ -116,112 +114,113 @@ export const EventDetailDrawer: React.FC<EventDetailDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-0 md:inset-x-auto md:inset-y-0 md:right-0 z-50 w-full md:w-[480px] max-h-[85vh] md:max-h-full bg-white border-t md:border-t-0 md:border-l border-slate-200 shadow-2xl flex flex-col h-auto md:h-full overflow-hidden animate-in slide-in-from-bottom md:slide-in-from-right duration-200">
+    <div className="fixed inset-x-0 bottom-0 md:inset-x-auto md:inset-y-0 md:right-0 z-50 w-full md:w-[460px] max-h-[85vh] md:max-h-full bg-white border-t md:border-t-0 md:border-l border-slate-300 shadow-2xl flex flex-col h-auto md:h-full overflow-hidden">
       {/* Drawer Header */}
-      <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="font-mono text-sm font-bold text-slate-800">
+      <div className="px-4 py-3 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
+        <div className="flex items-center gap-2.5">
+          <span className="font-mono text-xs font-bold text-blue-300">
             {event.event_code}
-          </div>
+          </span>
           <VerificationBadge
             status={event.verification_status}
             trustScore={event.trust_score}
+            size="sm"
           />
         </div>
         <button
           onClick={onClose}
-          className="text-slate-400 hover:text-slate-700 p-1 rounded-md hover:bg-slate-200/60 transition-colors"
+          className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-800 transition-colors"
           title="Close drawer"
         >
-          <X size={18} />
+          <X size={16} />
         </button>
       </div>
 
       {/* Scrollable Dossier Content */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {/* Classification & Headline */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-3.5 text-xs text-slate-800">
+        {/* Incident Classification & Headline */}
         <div>
-          <div className="text-[11px] font-bold text-blue-700 uppercase tracking-wider mb-1">
-            Hazard Classification • {event.primary_category}
+          <div className="text-[10px] font-mono font-bold text-blue-700 uppercase tracking-wider mb-0.5">
+            Hazard: {event.primary_category}
           </div>
-          <h2 className="text-base font-bold text-slate-900 leading-snug">
+          <h2 className="text-sm font-bold text-slate-900 leading-snug">
             {event.headline}
           </h2>
-          <div className="flex items-center gap-1.5 text-xs text-slate-600 mt-1.5 font-medium">
-            <MapPin size={13} className="text-slate-400" />
+          <div className="flex items-center gap-1.5 text-slate-600 mt-1 font-medium text-[11px]">
+            <MapPin size={12} className="text-slate-400 shrink-0" />
             <span>
               {event.location_name} ({event.district}, {event.state})
             </span>
           </div>
         </div>
 
-        {/* Coordinates & Corroboration Card */}
-        <div className="bg-slate-50 p-3.5 rounded-lg border border-slate-200 text-xs space-y-2">
+        {/* Telemetry & Metadata Strip */}
+        <div className="bg-slate-50 p-3 rounded border border-slate-200 space-y-1.5 font-mono text-[11px]">
           <div className="flex justify-between items-center">
-            <span className="text-slate-500">GPS Coordinates:</span>
-            <span className="font-mono font-medium text-slate-800">
+            <span className="text-slate-500 font-sans">GPS Reticle:</span>
+            <span className="font-semibold text-slate-800">
               {event.latitude.toFixed(4)}° N, {event.longitude.toFixed(4)}° E
             </span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-slate-500">Threat Severity:</span>
+            <span className="text-slate-500 font-sans">Threat Severity:</span>
             <span
-              className={`font-semibold uppercase px-2 py-0.5 rounded text-[11px] ${
+              className={`font-bold uppercase px-1.5 py-0.2 rounded text-[10px] ${
                 event.severity === "severe"
-                  ? "bg-rose-100 text-rose-800"
-                  : "bg-slate-200 text-slate-800"
+                  ? "bg-rose-100 text-rose-900 border border-rose-300"
+                  : "bg-slate-200 text-slate-800 border border-slate-300"
               }`}
             >
               {event.severity}
             </span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-slate-500">Citizen & Sensor Reports:</span>
-            <span className="font-semibold text-blue-700">
-              {event.report_count} Reports Merged
+            <span className="text-slate-500 font-sans">Corroborated Reports:</span>
+            <span className="font-semibold text-blue-800">
+              {event.report_count} Sensor & Ground Reports
             </span>
           </div>
         </div>
 
         {/* Operational Summary */}
-        <div className="bg-white p-3.5 rounded-lg border border-slate-200 space-y-1.5">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800">
-            <FileText size={13} className="text-slate-500" />
+        <div className="bg-white p-3 rounded border border-slate-200 space-y-1">
+          <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-slate-700 font-mono text-[11px]">
+            <FileText size={12} className="text-slate-500" />
             <span>Operational Summary</span>
           </div>
-          <p className="text-xs text-slate-600 leading-relaxed">
+          <p className="text-slate-600 leading-relaxed text-xs">
             {event.summary}
           </p>
         </div>
 
         {/* AI Trust Feature Attribution */}
-        <div className="bg-slate-50 p-3.5 rounded-lg border border-slate-200 space-y-2.5">
-          <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800">
-              <ShieldCheck size={14} className="text-blue-600" />
+        <div className="bg-slate-50 p-3 rounded border border-slate-200 space-y-2">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-1.5">
+            <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-slate-800 font-mono text-[11px]">
+              <ShieldCheck size={13} className="text-blue-600" />
               <span>Bayesian Trust Score</span>
             </div>
-            <span className="text-sm font-bold text-slate-900 tabular-nums">
+            <span className="font-mono text-sm font-bold text-slate-900 tabular-nums">
               {Math.round(event.trust_score * 100)}%
             </span>
           </div>
 
-          <div className="space-y-1.5 text-xs">
+          <div className="space-y-1 text-[11px] font-mono">
             <div className="flex justify-between text-slate-600">
-              <span>Source Authority Weight:</span>
-              <span className="font-semibold text-emerald-700">
+              <span className="font-sans">Source Authority Weight:</span>
+              <span className="font-semibold text-emerald-800">
                 {event.report_count >= 3 ? "+0.35 (Multi-source)" : "+0.18 (Single source)"}
               </span>
             </div>
             <div className="flex justify-between text-slate-600">
-              <span>Sensor Fusion Agreement:</span>
-              <span className="font-semibold text-emerald-700">
+              <span className="font-sans">Sensor Fusion Agreement:</span>
+              <span className="font-semibold text-emerald-800">
                 {event.trust_score >= 0.8 ? "+0.40 (IMD Doppler Correlated)" : "+0.15 (Baseline)"}
               </span>
             </div>
             <div className="flex justify-between text-slate-600">
-              <span>Imagery Verification:</span>
-              <span className="font-semibold text-emerald-700">
+              <span className="font-sans">Imagery Verification:</span>
+              <span className="font-semibold text-emerald-800">
                 {event.headline.includes("Photo") || event.report_count > 2
                   ? "+0.20 (Verified Exif)"
                   : "0.00 (Unchecked)"}
@@ -230,41 +229,41 @@ export const EventDetailDrawer: React.FC<EventDetailDrawerProps> = ({
           </div>
         </div>
 
-        {/* Dispatch Notification Feedback */}
+        {/* Feedback Alert */}
         {dispatchStatus && (
-          <div className="p-3 bg-emerald-50 border border-emerald-300 rounded-lg text-xs font-semibold text-emerald-800 flex items-center gap-2">
-            <CheckCircle2 size={15} className="shrink-0" />
+          <div className="p-2.5 bg-emerald-50 border border-emerald-300 rounded text-xs font-semibold text-emerald-900 flex items-center gap-2">
+            <CheckCircle2 size={14} className="shrink-0 text-emerald-600" />
             <span>{dispatchStatus}</span>
           </div>
         )}
       </div>
 
       {/* Action Console */}
-      <div className="p-4 bg-slate-50 border-t border-slate-200 space-y-2.5">
-        <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-          Decision & Emergency Triggers
+      <div className="p-3 bg-slate-100 border-t border-slate-300 space-y-2">
+        <div className="text-[10px] font-mono font-bold text-slate-600 uppercase tracking-widest">
+          Decision & Escalation Actions
         </div>
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => handleTriageAction("verify")}
             disabled={!canTriage}
-            className="py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 shadow-2xs disabled:opacity-50 disabled:cursor-not-allowed"
+            className="py-1.5 px-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 shadow-2xs disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <CheckCircle2 size={14} />
+            <CheckCircle2 size={13} />
             <span>Approve Event</span>
           </button>
           <button
             onClick={() => handleTriageAction("reject")}
             disabled={!canTriage}
-            className="py-2 px-3 bg-white hover:bg-rose-50 text-rose-700 border border-rose-300 rounded-md text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="py-1.5 px-3 bg-white hover:bg-rose-50 text-rose-700 border border-rose-300 rounded text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs"
           >
-            <XCircle size={14} />
+            <XCircle size={13} />
             <span>Reject as Noise</span>
           </button>
         </div>
 
         {!canTriage && (
-          <div className="text-[10px] text-slate-500 text-center">
+          <div className="text-[10px] text-slate-500 text-center font-mono">
             Sign in as IMD Analyst, State EOC, or NDMA Admin to triage.
           </div>
         )}
@@ -274,31 +273,31 @@ export const EventDetailDrawer: React.FC<EventDetailDrawerProps> = ({
             onClick={() => handleSimulatedDispatch("sachet_broadcast")}
             disabled={isDispatching || !isAdmin}
             title={!isAdmin ? "NDMA Admin Clearance Required" : "Broadcast via SACHET"}
-            className="py-2 px-3 bg-rose-600 hover:bg-rose-700 text-white rounded-md text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs"
+            className="py-1.5 px-3 bg-rose-700 hover:bg-rose-800 text-white rounded text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs"
           >
-            <Radio size={14} />
+            <Radio size={13} />
             <span>SACHET Broadcast</span>
-            {!isAdmin && <Lock size={11} className="ml-1 opacity-70" />}
+            {!isAdmin && <Lock size={10} className="ml-0.5 opacity-70" />}
           </button>
           <button
             onClick={() => handleSimulatedDispatch("ndma_escalation")}
             disabled={isDispatching || !isAdmin}
             title={!isAdmin ? "NDMA Admin Clearance Required" : "Escalate to NDMA"}
-            className="py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs"
+            className="py-1.5 px-3 bg-blue-700 hover:bg-blue-800 text-white rounded text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs"
           >
-            <Send size={14} />
+            <Send size={13} />
             <span>Escalate to NDMA</span>
-            {!isAdmin && <Lock size={11} className="ml-1 opacity-70" />}
+            {!isAdmin && <Lock size={10} className="ml-0.5 opacity-70" />}
           </button>
         </div>
 
         {!isAdmin && (
-          <div className="flex items-center justify-between text-[11px] text-amber-700 bg-amber-50 px-2.5 py-1 rounded border border-amber-200">
+          <div className="flex items-center justify-between text-[10px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-300">
             <span className="flex items-center gap-1 font-medium">
-              <Lock size={11} />
+              <Lock size={10} />
               Alert dispatch requires NDMA Admin clearance
             </span>
-            <span className="text-[9px] uppercase font-bold text-amber-600 bg-amber-100 px-1 rounded">
+            <span className="text-[9px] uppercase font-mono font-bold text-amber-700">
               Admin Only
             </span>
           </div>

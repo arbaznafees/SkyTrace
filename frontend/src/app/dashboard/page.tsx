@@ -297,7 +297,7 @@ export default function DashboardPage() {
       <TacticalRail pendingReviewCount={stats?.pendingCount ?? 0} />
 
       {/* Main Operations Matrix Canvas */}
-      <div className="pl-0 xl:pl-64 pt-24 pb-16 md:pb-0 flex-1 flex flex-col min-h-0">
+      <div className="pl-0 xl:pl-60 pt-[84px] pb-16 md:pb-0 flex-1 flex flex-col min-h-0">
         {/* Top-Bar Telemetry & Stream Metrics Ticker */}
         <TopBarStatsTicker
           totalEvents={stats?.totalEvents}

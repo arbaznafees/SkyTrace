@@ -15,12 +15,8 @@ import {
   Camera,
   MapPin,
   CheckCircle2,
-  AlertCircle,
-  Trash2,
   Send,
   Navigation,
-  ShieldCheck,
-  User,
 } from "lucide-react";
 
 interface CategoryOption {
@@ -163,43 +159,43 @@ export default function CitizenReportPage() {
       <TacticalHeader stats={stats} />
 
       {/* Main Container */}
-      <main className="flex-1 pt-24 px-4 sm:px-6 max-w-3xl mx-auto w-full space-y-6">
-        {/* Page Title */}
-        <div className="text-center sm:text-left space-y-1">
-          <div className="text-xs font-semibold text-blue-700 uppercase tracking-wide">
-            Public Incident Reporting
+      <main className="flex-1 pt-24 px-4 sm:px-6 max-w-3xl mx-auto w-full space-y-5">
+        {/* Page Title & Mission */}
+        <div className="border-b border-slate-300 pb-3">
+          <div className="text-[11px] font-mono font-bold text-blue-800 uppercase tracking-widest">
+            Civil Defense & Public Weather Intelligence
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mt-0.5">
             Citizen Ground Observation Report
           </h1>
-          <p className="text-xs sm:text-sm text-slate-600">
-            Submit real-time ground weather observations. Reports are verified with IMD radar telemetry to trigger emergency warnings.
+          <p className="text-xs text-slate-600 mt-1">
+            Submit real-time ground weather observations. Reports are corroborated with IMD radar telemetry to trigger emergency warnings.
           </p>
         </div>
 
         {/* Success Confirmation Card */}
         {submitResult && submitResult.success && (
-          <div className="bg-emerald-50 border border-emerald-300 rounded-xl p-5 shadow-xs space-y-3">
-            <div className="flex items-center gap-2.5 text-emerald-900 font-bold text-sm">
-              <CheckCircle2 size={18} className="text-emerald-600" />
-              <span>Report Successfully Ingested</span>
+          <div className="bg-emerald-50 border border-emerald-300 rounded p-4 shadow-2xs space-y-2">
+            <div className="flex items-center gap-2 text-emerald-950 font-bold text-xs">
+              <CheckCircle2 size={16} className="text-emerald-700" />
+              <span>Report Ingested into Verification Pipeline</span>
             </div>
             <p className="text-xs text-emerald-800">
               {submitResult.message || "Your field report was linked to the operational verification queue."}
             </p>
-            <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-emerald-900 pt-2 border-t border-emerald-200">
+            <div className="flex flex-wrap items-center gap-4 text-xs font-mono font-medium text-emerald-900 pt-2 border-t border-emerald-200">
               <div>
-                Incident ID: <strong className="font-mono">{submitResult.eventCode}</strong>
+                Incident ID: <strong className="text-slate-900">{submitResult.eventCode}</strong>
               </div>
               {submitResult.trustScore !== undefined && (
                 <div>
-                  Calculated Trust Score:{" "}
+                  Trust Score:{" "}
                   <strong>{Math.round(submitResult.trustScore * 100)}%</strong>
                 </div>
               )}
               <Link
                 href="/dashboard"
-                className="text-blue-700 hover:underline font-semibold ml-auto"
+                className="text-blue-800 hover:underline font-semibold ml-auto font-sans"
               >
                 View on Dashboard →
               </Link>
@@ -207,16 +203,19 @@ export default function CitizenReportPage() {
           </div>
         )}
 
-        {/* Main Form Card */}
+        {/* Main Official Form Card */}
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-xl border border-slate-200 p-5 sm:p-8 shadow-sm space-y-6"
+          className="bg-white rounded border border-slate-300 p-5 sm:p-6 shadow-xs space-y-5"
         >
           {/* Step 1: Category Selection */}
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-              1. Observed Weather Phenomenon
-            </label>
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-slate-800 uppercase font-mono tracking-wider">
+                1. Observed Weather Phenomenon <span className="text-rose-600">*</span>
+              </label>
+              <span className="text-[10px] text-slate-400 font-mono">Single selection</span>
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {CATEGORIES.map((cat) => {
                 const isSelected = selectedCategory === cat.id;
@@ -226,21 +225,21 @@ export default function CitizenReportPage() {
                     key={cat.id}
                     type="button"
                     onClick={() => setSelectedCategory(cat.id)}
-                    className={`p-3 rounded-lg border text-left flex flex-col justify-between transition-all ${
+                    className={`p-2.5 rounded border text-left flex flex-col justify-between transition-all ${
                       isSelected
-                        ? "bg-blue-50 border-blue-500 ring-1 ring-blue-500 shadow-xs"
-                        : "bg-slate-50 border-slate-200 hover:bg-slate-100"
+                        ? "bg-slate-900 text-white border-slate-900 shadow-2xs"
+                        : "bg-slate-50 border-slate-300 text-slate-800 hover:bg-slate-100"
                     }`}
                   >
                     <Icon
-                      size={20}
-                      className={isSelected ? "text-blue-600" : "text-slate-500"}
+                      size={18}
+                      className={isSelected ? "text-blue-400" : "text-slate-500"}
                     />
                     <div className="mt-2">
-                      <div className="text-xs font-bold text-slate-900">
+                      <div className="text-xs font-bold leading-tight">
                         {cat.name}
                       </div>
-                      <div className="text-[10px] text-slate-500 truncate">
+                      <div className={`text-[10px] truncate mt-0.5 ${isSelected ? "text-slate-300" : "text-slate-500"}`}>
                         {cat.subtext}
                       </div>
                     </div>
@@ -251,24 +250,24 @@ export default function CitizenReportPage() {
           </div>
 
           {/* Step 2: Severity Level */}
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-              2. Severity on the Ground
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-800 uppercase font-mono tracking-wider">
+              2. Ground Threat Severity <span className="text-rose-600">*</span>
             </label>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { id: "mild", label: "Mild / Caution", color: "text-blue-700" },
-                { id: "moderate", label: "Moderate / Disruptive", color: "text-amber-700" },
-                { id: "severe", label: "Severe / Dangerous", color: "text-rose-700" },
+                { id: "mild", label: "Mild / Caution" },
+                { id: "moderate", label: "Moderate / Disruptive" },
+                { id: "severe", label: "Severe / Dangerous" },
               ].map((sev) => (
                 <button
                   key={sev.id}
                   type="button"
                   onClick={() => setSeverity(sev.id as any)}
-                  className={`py-2 px-3 text-xs font-semibold rounded-lg border text-center transition-colors ${
+                  className={`py-1.5 px-3 text-xs font-semibold rounded border text-center transition-colors font-mono ${
                     severity === sev.id
-                      ? "bg-blue-600 text-white border-blue-600 shadow-xs"
-                      : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                      ? "bg-slate-900 text-white border-slate-900"
+                      : "bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100"
                   }`}
                 >
                   {sev.label}
@@ -278,69 +277,69 @@ export default function CitizenReportPage() {
           </div>
 
           {/* Step 3: Location Lock & Coordinates */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <div className="flex justify-between items-center">
-              <label className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-                3. Incident Location & GPS
+              <label className="text-xs font-bold text-slate-800 uppercase font-mono tracking-wider">
+                3. Incident Location & GPS <span className="text-rose-600">*</span>
               </label>
               <button
                 type="button"
                 onClick={handleAcquireGPS}
                 disabled={gpsLoading}
-                className="text-xs font-semibold text-blue-700 hover:text-blue-900 flex items-center gap-1"
+                className="text-xs font-semibold text-blue-700 hover:text-blue-900 flex items-center gap-1 font-mono"
               >
                 <Navigation size={12} className={gpsLoading ? "animate-spin" : ""} />
                 <span>{gpsLoading ? "Acquiring..." : "Use Current GPS"}</span>
               </button>
             </div>
             <div className="relative">
-              <MapPin size={15} className="absolute left-3 top-3 text-slate-400" />
+              <MapPin size={14} className="absolute left-2.5 top-2.5 text-slate-400" />
               <input
                 type="text"
                 required
                 value={locationName}
                 onChange={(e) => setLocationName(e.target.value)}
                 placeholder="Street address, landmark, district..."
-                className="w-full bg-slate-50 border border-slate-300 rounded-lg pl-9 pr-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full bg-slate-50 border border-slate-300 rounded pl-8 pr-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-600"
               />
             </div>
-            <div className="text-[11px] text-slate-500 flex items-center gap-3">
+            <div className="text-[10px] font-mono text-slate-500 flex items-center gap-3">
               <span>Latitude: {latitude.toFixed(4)}° N</span>
               <span>•</span>
               <span>Longitude: {longitude.toFixed(4)}° E</span>
               <span>•</span>
-              <span className="text-emerald-700 font-medium">GPS Correlated</span>
+              <span className="text-emerald-700 font-semibold">GPS Fix Active</span>
             </div>
           </div>
 
           {/* Step 4: Photo Proof */}
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-800 uppercase font-mono tracking-wider">
               4. Photographic Verification (Optional)
             </label>
-            <div className="border-2 border-dashed border-slate-300 rounded-xl p-4 flex items-center justify-between gap-4 bg-slate-50">
+            <div className="border border-slate-300 rounded p-3 flex items-center justify-between gap-3 bg-slate-50">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700 shrink-0">
-                  <Camera size={22} />
+                <div className="w-10 h-10 rounded bg-slate-200 flex items-center justify-center text-slate-700 shrink-0 border border-slate-300">
+                  <Camera size={18} />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-slate-900">
+                  <div className="text-xs font-bold text-slate-900 font-mono">
                     {hasMedia ? "flood_inundation_ground_01.jpg" : "Attach Photo Proof"}
                   </div>
-                  <div className="text-[11px] text-slate-500">
+                  <div className="text-[10px] text-slate-500">
                     {hasMedia
-                      ? "EXIF GPS metadata verified • 2.4 MB"
-                      : "Direct smartphone camera photo increases verification weight"}
+                      ? "EXIF GPS metadata verified • 2.4 MB (Simulated Sample)"
+                      : "Direct smartphone photo increases Bayesian verification weight"}
                   </div>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setHasMedia(!hasMedia)}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold border transition-colors ${
+                className={`px-3 py-1 rounded text-xs font-semibold border transition-colors ${
                   hasMedia
                     ? "bg-white text-rose-700 border-rose-300 hover:bg-rose-50"
-                    : "bg-blue-600 text-white border-blue-600 hover:bg-blue-700"
+                    : "bg-slate-900 text-white border-slate-900 hover:bg-slate-800"
                 }`}
               >
                 {hasMedia ? "Remove" : "Attach Sample"}
@@ -349,12 +348,12 @@ export default function CitizenReportPage() {
           </div>
 
           {/* Step 5: Ground Notes Description */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <div className="flex justify-between items-center">
-              <label className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-                5. Ground Observations
+              <label className="text-xs font-bold text-slate-800 uppercase font-mono tracking-wider">
+                5. Ground Observations <span className="text-rose-600">*</span>
               </label>
-              <span className="text-[11px] text-slate-400">
+              <span className="text-[10px] text-slate-400 font-mono">
                 {groundNotes.length}/280
               </span>
             </div>
@@ -364,14 +363,14 @@ export default function CitizenReportPage() {
               value={groundNotes}
               onChange={(e) => setGroundNotes(e.target.value)}
               placeholder="Describe what you see: water depth, blocked routes, damaged lines..."
-              className="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 leading-relaxed"
+              className="w-full bg-slate-50 border border-slate-300 rounded p-2.5 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-600 leading-relaxed"
             />
           </div>
 
           {/* Step 6: Observer Profile */}
-          <div className="space-y-2 pt-2 border-t border-slate-200">
+          <div className="space-y-1.5 pt-2 border-t border-slate-200">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+              <label className="text-xs font-bold text-slate-800 uppercase font-mono tracking-wider">
                 6. Observer Attribution
               </label>
               <label className="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
@@ -391,26 +390,26 @@ export default function CitizenReportPage() {
                   value={observerName}
                   onChange={(e) => setObserverName(e.target.value)}
                   placeholder="Your Name / Callout"
-                  className="w-1/2 bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-900"
+                  className="w-1/2 bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900"
                 />
                 <input
                   type="text"
                   disabled
                   value={observerId}
-                  className="w-1/2 bg-slate-100 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-500 font-mono"
+                  className="w-1/2 bg-slate-100 border border-slate-200 rounded px-2.5 py-1.5 text-xs text-slate-500 font-mono"
                 />
               </div>
             )}
           </div>
 
           {/* Submit Trigger */}
-          <div className="pt-2">
+          <div className="pt-2 border-t border-slate-200">
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-3 px-4 text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+              className="w-full bg-blue-700 hover:bg-blue-800 text-white rounded py-2.5 px-4 text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 shadow-xs disabled:opacity-50"
             >
-              <Send size={15} />
+              <Send size={14} />
               <span>{submitting ? "Submitting to Verification Deck..." : "Submit Incident Report"}</span>
             </button>
           </div>

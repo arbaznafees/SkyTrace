@@ -53,35 +53,38 @@ export const TacticalFilterDeck: React.FC<TacticalFilterDeckProps> = ({
   };
 
   return (
-    <aside className="w-full xl:w-72 bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 overflow-y-auto shadow-2xs">
-      <div className="p-4 space-y-5">
+    <aside className="w-full xl:w-64 bg-white border-r border-slate-300 flex flex-col justify-between shrink-0 overflow-y-auto text-slate-800 shadow-2xs">
+      <div className="p-3.5 space-y-4">
         {/* Title */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+        <div className="flex items-center justify-between pb-2.5 border-b border-slate-200">
           <div>
-            <div className="text-sm font-bold text-slate-900">
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-900 font-mono">
               Filter Incidents
             </div>
-            <div className="text-[11px] text-slate-500">
+            <div className="text-[10px] text-slate-500">
               Narrow active disaster stream
             </div>
           </div>
-          <SlidersHorizontal size={16} className="text-blue-600" />
+          <SlidersHorizontal size={14} className="text-slate-500" />
         </div>
 
         {/* Temporal Window Filter */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-700">
-            Time Window
-          </label>
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
+            <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 font-mono">
+              Time Window
+            </label>
+            <span className="text-[9px] text-slate-400 font-mono">(Telemetry State)</span>
+          </div>
           <div className="grid grid-cols-4 gap-1">
             {(["1h", "6h", "24h", "all"] as const).map((tw) => (
               <button
                 key={tw}
                 onClick={() => onFilterChange({ ...filters, timeWindow: tw })}
-                className={`py-1 text-center text-xs font-medium rounded-md transition-colors border ${
+                className={`py-1 text-center font-mono text-[11px] font-semibold rounded border transition-colors ${
                   filters.timeWindow === tw
-                    ? "bg-blue-600 text-white border-blue-600 shadow-2xs font-semibold"
-                    : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                    ? "bg-slate-900 text-white border-slate-900"
+                    : "bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100"
                 }`}
               >
                 {tw === "all" ? "All" : tw.toUpperCase()}
@@ -91,27 +94,27 @@ export const TacticalFilterDeck: React.FC<TacticalFilterDeckProps> = ({
         </div>
 
         {/* Verification Status Filter */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-700">
+        <div className="space-y-1">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 font-mono">
             Verification Status
           </label>
-          <div className="grid grid-cols-2 gap-1.5 text-xs">
+          <div className="grid grid-cols-2 gap-1 text-[11px]">
             <button
               onClick={() => onFilterChange({ ...filters, statusFilter: "all" })}
-              className={`px-2.5 py-1.5 text-left rounded-md border font-medium transition-colors ${
+              className={`px-2 py-1 text-left rounded border font-medium transition-colors ${
                 filters.statusFilter === "all"
-                  ? "bg-blue-50 text-blue-700 border-blue-300 font-semibold"
-                  : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                  ? "bg-slate-900 text-white border-slate-900 font-bold"
+                  : "bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100"
               }`}
             >
               All Statuses
             </button>
             <button
               onClick={() => onFilterChange({ ...filters, statusFilter: "verified" })}
-              className={`px-2.5 py-1.5 text-left rounded-md border font-medium transition-colors ${
+              className={`px-2 py-1 text-left rounded border font-medium transition-colors ${
                 filters.statusFilter === "verified"
-                  ? "bg-emerald-50 text-emerald-800 border-emerald-300 font-semibold"
-                  : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                  ? "bg-emerald-700 text-white border-emerald-800 font-bold"
+                  : "bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100"
               }`}
             >
               Verified Only
@@ -120,10 +123,10 @@ export const TacticalFilterDeck: React.FC<TacticalFilterDeckProps> = ({
               onClick={() =>
                 onFilterChange({ ...filters, statusFilter: "pending_triage" })
               }
-              className={`px-2.5 py-1.5 text-left rounded-md border font-medium transition-colors ${
+              className={`px-2 py-1 text-left rounded border font-medium transition-colors ${
                 filters.statusFilter === "pending_triage"
-                  ? "bg-amber-50 text-amber-800 border-amber-300 font-semibold"
-                  : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                  ? "bg-amber-600 text-white border-amber-700 font-bold"
+                  : "bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100"
               }`}
             >
               Under Review
@@ -132,10 +135,10 @@ export const TacticalFilterDeck: React.FC<TacticalFilterDeckProps> = ({
               onClick={() =>
                 onFilterChange({ ...filters, statusFilter: "rejected" })
               }
-              className={`px-2.5 py-1.5 text-left rounded-md border font-medium transition-colors ${
+              className={`px-2 py-1 text-left rounded border font-medium transition-colors ${
                 filters.statusFilter === "rejected"
-                  ? "bg-rose-50 text-rose-800 border-rose-300 font-semibold"
-                  : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                  ? "bg-rose-700 text-white border-rose-800 font-bold"
+                  : "bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100"
               }`}
             >
               Rejected
@@ -144,8 +147,8 @@ export const TacticalFilterDeck: React.FC<TacticalFilterDeckProps> = ({
         </div>
 
         {/* Geographic Sector Selector */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-700">
+        <div className="space-y-1">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 font-mono">
             State / Geographic Sector
           </label>
           <select
@@ -153,7 +156,7 @@ export const TacticalFilterDeck: React.FC<TacticalFilterDeckProps> = ({
             onChange={(e) =>
               onFilterChange({ ...filters, sector: e.target.value })
             }
-            className="w-full bg-slate-50 border border-slate-300 rounded-md text-slate-800 text-xs px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full bg-slate-50 border border-slate-300 rounded text-slate-800 text-xs px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600"
           >
             {SECTORS.map((s) => (
               <option key={s} value={s}>
@@ -164,26 +167,26 @@ export const TacticalFilterDeck: React.FC<TacticalFilterDeckProps> = ({
         </div>
 
         {/* Atmospheric Class Checklist */}
-        <div className="space-y-1.5">
-          <div className="flex justify-between items-center text-xs font-semibold text-slate-700">
+        <div className="space-y-1">
+          <div className="flex justify-between items-center text-[11px] font-bold uppercase tracking-wider text-slate-700 font-mono">
             <span>Hazard Categories</span>
-            <span className="text-[11px] font-normal text-slate-500">
-              ({filters.selectedCategories.length}/7 active)
+            <span className="text-[10px] font-mono text-slate-500 font-normal">
+              {filters.selectedCategories.length}/7 active
             </span>
           </div>
-          <div className="space-y-1 pt-1">
+          <div className="space-y-0.5 pt-0.5">
             {CATEGORIES.map((cat) => {
               const isChecked = filters.selectedCategories.includes(cat.id);
               return (
                 <label
                   key={cat.id}
-                  className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1.5 rounded text-xs text-slate-700 transition-colors"
+                  className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 px-2 py-1 rounded text-xs text-slate-700 transition-colors"
                 >
                   <input
                     type="checkbox"
                     checked={isChecked}
                     onChange={() => toggleCategory(cat.id)}
-                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    className="w-3.5 h-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                   />
                   <span>{cat.label}</span>
                 </label>
@@ -193,10 +196,10 @@ export const TacticalFilterDeck: React.FC<TacticalFilterDeckProps> = ({
         </div>
 
         {/* AI Trust Gate Slider */}
-        <div className="space-y-1.5 pt-3 border-t border-slate-200">
-          <div className="flex justify-between items-center text-xs text-slate-700 font-semibold">
+        <div className="space-y-1 pt-2 border-t border-slate-200">
+          <div className="flex justify-between items-center text-[11px] font-bold uppercase tracking-wider text-slate-700 font-mono">
             <span>Minimum Trust Score</span>
-            <span className="text-blue-700 font-bold tabular-nums">
+            <span className="font-mono text-blue-700 font-bold tabular-nums">
               ≥ {Math.round(filters.minTrust * 100)}%
             </span>
           </div>
@@ -209,23 +212,23 @@ export const TacticalFilterDeck: React.FC<TacticalFilterDeckProps> = ({
             onChange={(e) =>
               onFilterChange({ ...filters, minTrust: parseFloat(e.target.value) })
             }
-            className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+            className="w-full h-1.5 bg-slate-200 rounded appearance-none cursor-pointer accent-blue-600"
           />
-          <div className="flex justify-between text-[10px] text-slate-400">
+          <div className="flex justify-between text-[9px] font-mono text-slate-500">
             <span>20% (All)</span>
             <span>50% (Review)</span>
-            <span>80% (High Confidence)</span>
+            <span>80% (High Conf)</span>
           </div>
         </div>
       </div>
 
       {/* Reset Filter Action */}
-      <div className="p-4 border-t border-slate-200 bg-slate-50">
+      <div className="p-3 border-t border-slate-200 bg-slate-50">
         <button
           onClick={onReset}
-          className="w-full py-2 px-3 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-300 rounded-md transition-colors flex items-center justify-center gap-1.5 shadow-2xs"
+          className="w-full py-1.5 px-3 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-300 rounded transition-colors flex items-center justify-center gap-1.5 shadow-2xs"
         >
-          <RotateCcw size={13} />
+          <RotateCcw size={12} />
           <span>Reset All Filters</span>
         </button>
       </div>

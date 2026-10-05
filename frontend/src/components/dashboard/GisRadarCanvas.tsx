@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { MapPin, Navigation } from "lucide-react";
+import { Navigation } from "lucide-react";
 
 export interface GisEventItem {
   id: string;
@@ -52,24 +52,24 @@ export const GisRadarCanvas: React.FC<GisRadarCanvasProps> = ({
       if (mapInstanceRef.current || (mapContainerRef.current as any)._leaflet_id) return;
 
       const map = L.map(mapContainerRef.current, {
-        center: [21.0, 82.0], // Center on India / East Coast corridor
+        center: [21.0, 82.0], // Center on India
         zoom: 5,
         zoomControl: false,
         attributionControl: true,
       });
 
-      // Humanitarian OpenStreetMap (HOT) disaster tiles (100% free, zero API key, zero watermark)
+      // Humanitarian OpenStreetMap (HOT) disaster tiles
       L.tileLayer(
         "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
         {
           maxZoom: 19,
           subdomains: ["a", "b", "c"],
           attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Tiles style by <a href="https://www.hotosm.org/">Humanitarian OpenStreetMap Team</a>',
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         }
       ).addTo(map);
 
-      // Clean Zoom control at bottom left
+      // Zoom control at bottom left
       L.control.zoom({ position: "bottomleft" }).addTo(map);
 
       // Mousemove listener for HUD coordinates
@@ -86,7 +86,6 @@ export const GisRadarCanvas: React.FC<GisRadarCanvasProps> = ({
       mapInstanceRef.current = map;
       setMapReady(true);
 
-      // Invalidate size to ensure full tile coverage
       setTimeout(() => {
         if (!isCancelled && mapInstanceRef.current) {
           mapInstanceRef.current.invalidateSize();
@@ -117,32 +116,32 @@ export const GisRadarCanvas: React.FC<GisRadarCanvasProps> = ({
       events.forEach((evt) => {
         const isSelected = selectedEvent?.id === evt.id;
 
-        let bgHex = "#10b981"; // emerald for verified
+        let bgHex = "#059669"; // emerald for verified
         if (evt.verification_status === "pending_triage" || evt.verification_status === "pending") {
-          bgHex = "#f59e0b"; // amber for pending
+          bgHex = "#d97706"; // amber for pending
         } else if (
           evt.verification_status === "rejected" ||
           evt.severity === "severe"
         ) {
-          bgHex = "#ef4444"; // red for severe / rejected
+          bgHex = "#dc2626"; // red for severe / rejected
         }
 
-        const size = isSelected ? 28 : 22;
+        const size = isSelected ? 24 : 18;
         const iconHtml = `
           <div style="
             width: ${size}px;
             height: ${size}px;
             border-radius: 9999px;
             background-color: ${bgHex};
-            border: 2.5px solid #ffffff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.25)${isSelected ? ", 0 0 0 3px #1d4ed8" : ""};
+            border: 2px solid #ffffff;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.35)${isSelected ? ", 0 0 0 3px #1d4ed8" : ""};
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: transform 0.15s ease;
           ">
-            <div style="width: 6px; height: 6px; border-radius: 9999px; background-color: #ffffff;"></div>
+            <div style="width: 5px; height: 5px; border-radius: 9999px; background-color: #ffffff;"></div>
           </div>
         `;
 
@@ -163,12 +162,12 @@ export const GisRadarCanvas: React.FC<GisRadarCanvasProps> = ({
 
         marker.bindTooltip(
           `
-          <div style="background: #ffffff; border: 1px solid #e2e8f0; color: #0f172a; padding: 6px 10px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); font-family: -apple-system, sans-serif; font-size: 12px; line-height: 1.3;">
-            <div style="font-weight: 700; color: ${bgHex}; display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
+          <div style="background: #0f172a; border: 1px solid #334155; color: #f8fafc; padding: 6px 10px; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.25); font-family: -apple-system, sans-serif; font-size: 11px; line-height: 1.3;">
+            <div style="font-weight: 700; color: #60a5fa; font-family: monospace; display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
               ${evt.event_code} • ${evt.primary_category.toUpperCase()}
             </div>
-            <div style="font-weight: 600; color: #1e293b;">${evt.location_name || evt.district}</div>
-            <div style="color: #64748b; font-size: 11px; margin-top: 2px;">
+            <div style="font-weight: 600; color: #ffffff;">${evt.location_name || evt.district}</div>
+            <div style="color: #94a3b8; font-size: 10px; margin-top: 2px;">
               ${evt.district}, ${evt.state} • Trust: ${Math.round(evt.trust_score * 100)}%
             </div>
           </div>
@@ -179,7 +178,6 @@ export const GisRadarCanvas: React.FC<GisRadarCanvasProps> = ({
         markersLayerRef.current.addLayer(marker);
       });
 
-      // If selectedEvent changes, pan to it smoothly
       if (selectedEvent) {
         mapInstanceRef.current.setView(
           [selectedEvent.latitude, selectedEvent.longitude],
@@ -191,29 +189,29 @@ export const GisRadarCanvas: React.FC<GisRadarCanvasProps> = ({
   }, [events, selectedEvent, onSelectEvent, mapReady]);
 
   return (
-    <div className="relative flex-1 h-full min-h-[450px] bg-slate-100 overflow-hidden">
+    <div className="relative flex-1 h-full min-h-[400px] bg-slate-200 overflow-hidden">
       {/* Map Container */}
       <div ref={mapContainerRef} className="w-full h-full" />
 
       {/* Clean Status Overlay (Top Left) */}
-      <div className="absolute top-3 left-3 z-[400] flex items-center gap-2 bg-white/95 backdrop-blur-xs px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm text-xs font-semibold text-slate-800">
-        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        <span>GIS Ground Truth Map</span>
-        <span className="text-slate-300">|</span>
-        <span className="text-slate-500 font-normal">
-          {events.length} Active Incidents
+      <div className="absolute top-3 left-3 z-[400] flex items-center gap-2 bg-slate-900/90 text-white backdrop-blur-xs px-2.5 py-1 rounded border border-slate-700 shadow-sm text-xs font-semibold">
+        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span className="font-mono uppercase text-[11px] tracking-wide">GIS Radar Grid</span>
+        <span className="text-slate-600">|</span>
+        <span className="text-slate-300 font-mono text-[11px] font-normal">
+          {events.length} Incidents
         </span>
       </div>
 
       {/* Reticle Coordinates (Bottom Right) */}
-      <div className="absolute bottom-3 right-3 z-[400] bg-white/95 backdrop-blur-xs border border-slate-200 rounded-lg px-3 py-1.5 shadow-sm text-xs text-slate-700 flex items-center gap-3">
-        <Navigation size={13} className="text-blue-600" />
-        <div className="flex items-center gap-3 tabular-nums font-mono text-[11px]">
+      <div className="absolute bottom-3 right-3 z-[400] bg-slate-900/90 text-white backdrop-blur-xs border border-slate-700 rounded px-2.5 py-1 shadow-sm text-xs flex items-center gap-2.5">
+        <Navigation size={12} className="text-blue-400" />
+        <div className="flex items-center gap-3 tabular-nums font-mono text-[10px]">
           <span>
-            <strong className="text-slate-500 font-sans">Lat:</strong> {hudCoords.lat}
+            <strong className="text-slate-400 font-sans text-[10px]">Lat:</strong> {hudCoords.lat}
           </span>
           <span>
-            <strong className="text-slate-500 font-sans">Lon:</strong> {hudCoords.lon}
+            <strong className="text-slate-400 font-sans text-[10px]">Lon:</strong> {hudCoords.lon}
           </span>
         </div>
       </div>

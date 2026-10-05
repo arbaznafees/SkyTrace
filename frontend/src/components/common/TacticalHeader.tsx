@@ -32,7 +32,6 @@ export const TacticalHeader: React.FC<TacticalHeaderProps> = ({
   const { user, logout, isAuthenticated, isAdmin } = useAuth();
 
   useEffect(() => {
-    // If stats are not passed from parent, fetch live telemetry stats on mount
     if (stats === undefined) {
       fetchHeaderStats().then((data) => {
         if (data) setInternalStats(data);
@@ -65,13 +64,13 @@ export const TacticalHeader: React.FC<TacticalHeaderProps> = ({
   const getRoleBadge = (role?: string) => {
     switch (role?.toLowerCase()) {
       case "admin":
-        return { label: "NDMA Admin", bg: "bg-rose-50 text-rose-700 border-rose-200" };
+        return { label: "NDMA Admin", bg: "bg-rose-50 text-rose-800 border-rose-300" };
       case "analyst":
-        return { label: "IMD Analyst", bg: "bg-blue-50 text-blue-700 border-blue-200" };
+        return { label: "IMD Analyst", bg: "bg-blue-50 text-blue-800 border-blue-300" };
       case "eoc":
-        return { label: "State EOC", bg: "bg-amber-50 text-amber-700 border-amber-200" };
+        return { label: "State EOC", bg: "bg-amber-50 text-amber-800 border-amber-300" };
       default:
-        return { label: "Duty Officer", bg: "bg-slate-100 text-slate-700 border-slate-200" };
+        return { label: "Duty Officer", bg: "bg-slate-100 text-slate-800 border-slate-300" };
     }
   };
 
@@ -90,92 +89,83 @@ export const TacticalHeader: React.FC<TacticalHeaderProps> = ({
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 shadow-xs">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-300 shadow-xs">
       {/* Tier 1: Main Platform Identification & Operational Summary */}
-      <div className="h-14 px-4 sm:px-6 flex items-center justify-between gap-4">
+      <div className="h-12 px-4 sm:px-6 flex items-center justify-between gap-4 border-b border-slate-200 bg-slate-900 text-white">
         {/* Brand Identity */}
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-xs group-hover:bg-blue-700 transition-colors">
+        <div className="flex items-center gap-3">
+          <Link href="/dashboard" className="flex items-center gap-2.5 group">
+            <div className="w-7 h-7 rounded bg-blue-600 border border-blue-400 flex items-center justify-center text-white font-mono font-bold text-xs shadow-xs">
               ST
             </div>
             <div>
-              <div className="text-sm font-bold tracking-tight text-slate-900 leading-none">
-                SkyTrace
-              </div>
-              <div className="text-[11px] text-slate-500 font-medium tracking-normal mt-0.5">
-                National Weather Intelligence & Verification
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold tracking-wider uppercase text-white font-mono">
+                  SkyTrace
+                </span>
+                <span className="hidden sm:inline text-slate-500 text-[10px]">|</span>
+                <span className="hidden sm:inline text-[11px] text-slate-300 font-medium">
+                  National Disaster Weather Intelligence & Verification
+                </span>
               </div>
             </div>
           </Link>
 
-          <div className="hidden lg:flex items-center gap-2 px-2.5 py-1 bg-slate-100 rounded-md text-slate-700 text-xs font-medium border border-slate-200">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Live Monitoring Active</span>
+          <div className="hidden lg:flex items-center gap-1.5 px-2 py-0.5 bg-slate-800 rounded text-slate-300 text-[11px] border border-slate-700">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span className="font-mono text-[10px] tracking-wide uppercase">Operational</span>
           </div>
         </div>
 
         {/* Live Event Stats & Operational Time / User Profile */}
-        <div className="flex items-center gap-4">
-          <div className="hidden md:flex items-center gap-4 text-xs bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
-            <div className="flex items-center gap-1.5 text-slate-600">
-              <Layers size={13} className="text-blue-600" />
-              <span>Active Events:</span>
-              <span className="font-semibold text-slate-900 tabular-nums min-w-[20px] flex items-center">
-                {effectiveStats ? (
-                  effectiveStats.totalEvents
-                ) : (
-                  <span className="inline-block w-6 h-3.5 bg-slate-200 animate-pulse rounded" />
-                )}
+        <div className="flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-3 text-xs bg-slate-800/90 px-2.5 py-1 rounded border border-slate-700">
+            <div className="flex items-center gap-1.5 text-slate-300 text-[11px]">
+              <Layers size={12} className="text-blue-400" />
+              <span>Active:</span>
+              <span className="font-mono font-bold text-white tabular-nums">
+                {effectiveStats ? effectiveStats.totalEvents : "--"}
               </span>
             </div>
-            <span className="text-slate-300">|</span>
-            <div className="flex items-center gap-1.5 text-slate-600">
-              <Clock size={13} className="text-amber-500" />
-              <span>Pending Review:</span>
-              <span className="font-semibold text-amber-700 tabular-nums min-w-[18px] flex items-center">
-                {effectiveStats ? (
-                  effectiveStats.pendingCount
-                ) : (
-                  <span className="inline-block w-5 h-3.5 bg-amber-100 animate-pulse rounded" />
-                )}
+            <span className="text-slate-600">|</span>
+            <div className="flex items-center gap-1.5 text-slate-300 text-[11px]">
+              <Clock size={12} className="text-amber-400" />
+              <span>Pending:</span>
+              <span className="font-mono font-bold text-amber-300 tabular-nums">
+                {effectiveStats ? effectiveStats.pendingCount : "--"}
               </span>
             </div>
-            <span className="text-slate-300">|</span>
-            <div className="flex items-center gap-1.5 text-slate-600">
-              <AlertTriangle size={13} className="text-rose-500" />
-              <span>Severe Alerts:</span>
-              <span className="font-semibold text-rose-700 tabular-nums min-w-[18px] flex items-center">
-                {effectiveStats ? (
-                  effectiveStats.severeCount
-                ) : (
-                  <span className="inline-block w-5 h-3.5 bg-rose-100 animate-pulse rounded" />
-                )}
+            <span className="text-slate-600">|</span>
+            <div className="flex items-center gap-1.5 text-slate-300 text-[11px]">
+              <AlertTriangle size={12} className="text-rose-400" />
+              <span>Severe:</span>
+              <span className="font-mono font-bold text-rose-300 tabular-nums">
+                {effectiveStats ? effectiveStats.severeCount : "--"}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 pl-3 border-l border-slate-200">
-            <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-600 font-medium">
-              <Clock size={14} className="text-slate-400" />
+          <div className="flex items-center gap-2 pl-2 border-l border-slate-700">
+            <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-slate-300 font-mono">
+              <Clock size={12} className="text-slate-400" />
               <span className="tabular-nums">{utcTime}</span>
             </div>
 
             {isAuthenticated && user ? (
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2">
                 <div className="text-right hidden sm:block">
-                  <div className="text-xs font-semibold text-slate-800 leading-tight">
+                  <div className="text-[11px] font-semibold text-slate-200 leading-tight">
                     {user.full_name}
                   </div>
-                  <div className="flex items-center justify-end gap-1.5 mt-0.5">
+                  <div className="flex items-center justify-end gap-1 mt-0.5">
                     <span
-                      className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.2 rounded border ${
+                      className={`text-[9px] font-bold uppercase tracking-wider px-1 py-0.2 rounded border ${
                         getRoleBadge(user.role).bg
                       }`}
                     >
                       {getRoleBadge(user.role).label}
                     </span>
-                    <span className="text-[10px] text-slate-500 font-mono">
+                    <span className="text-[9px] text-slate-400 font-mono">
                       {user.station_id}
                     </span>
                   </div>
@@ -183,13 +173,7 @@ export const TacticalHeader: React.FC<TacticalHeaderProps> = ({
 
                 <div
                   title={`${user.full_name} (${user.role})`}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shadow-2xs border ${
-                    user.role === "admin"
-                      ? "bg-rose-100 text-rose-700 border-rose-300"
-                      : user.role === "eoc"
-                      ? "bg-amber-100 text-amber-700 border-amber-300"
-                      : "bg-blue-100 text-blue-700 border-blue-300"
-                  }`}
+                  className="w-7 h-7 rounded bg-slate-700 text-white border border-slate-600 flex items-center justify-center text-[11px] font-mono font-bold"
                 >
                   {getInitials(user.full_name)}
                 </div>
@@ -197,17 +181,17 @@ export const TacticalHeader: React.FC<TacticalHeaderProps> = ({
                 <button
                   onClick={logout}
                   title="Sign Out of Session"
-                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
+                  className="p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors"
                 >
-                  <LogOut size={15} />
+                  <LogOut size={14} />
                 </button>
               </div>
             ) : (
               <Link
                 href="/login"
-                className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-md bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors"
+                className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded bg-blue-600 hover:bg-blue-500 text-white transition-colors"
               >
-                <LogIn size={13} />
+                <LogIn size={12} />
                 <span>Sign In</span>
               </Link>
             )}
@@ -216,7 +200,7 @@ export const TacticalHeader: React.FC<TacticalHeaderProps> = ({
       </div>
 
       {/* Tier 2: Sub-Navigation Bar */}
-      <div className="h-10 px-4 sm:px-6 bg-slate-50/80 border-t border-slate-200 flex items-center justify-between overflow-x-auto">
+      <div className="h-9 px-4 sm:px-6 bg-slate-100 border-t border-slate-200 flex items-center justify-between overflow-x-auto">
         <nav className="flex items-center gap-1 h-full">
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
@@ -225,26 +209,26 @@ export const TacticalHeader: React.FC<TacticalHeaderProps> = ({
               <Link
                 key={link.href}
                 href={link.href}
-                className={`px-3 py-1 text-xs rounded-md font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap ${
+                className={`px-3 py-1 text-xs rounded font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap border ${
                   isActive
-                    ? "bg-blue-600 text-white shadow-xs font-semibold"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+                    ? "bg-white text-blue-900 border-slate-300 shadow-2xs font-semibold"
+                    : "border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-200/70"
                 }`}
               >
-                <Icon size={13} />
+                <Icon size={13} className={isActive ? "text-blue-700" : "text-slate-500"} />
                 <span>{link.label}</span>
                 {link.adminOnly && !isAdmin && (
-                  <span className="flex items-center text-[10px] text-slate-400 bg-slate-200/80 px-1 rounded ml-0.5" title="Admin access required">
-                    <Lock size={10} className="mr-0.5" />
+                  <span className="flex items-center text-[9px] text-slate-500 bg-slate-200 px-1 rounded font-mono" title="Admin access required">
+                    <Lock size={9} className="mr-0.5" />
                     Admin
                   </span>
                 )}
                 {link.badge !== undefined && (
                   <span
-                    className={`px-1.5 py-0.2 text-[10px] font-bold rounded-full tabular-nums ${
+                    className={`px-1.5 py-0.2 text-[9px] font-mono font-bold rounded tabular-nums ${
                       isActive
-                        ? "bg-white text-blue-700"
-                        : "bg-amber-100 text-amber-800"
+                        ? "bg-amber-100 text-amber-900 border border-amber-300"
+                        : "bg-slate-200 text-slate-700"
                     }`}
                   >
                     {link.badge}
@@ -255,8 +239,8 @@ export const TacticalHeader: React.FC<TacticalHeaderProps> = ({
           })}
         </nav>
 
-        <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500">
-          <Radio size={12} className="text-emerald-500" />
+        <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-slate-600 font-medium">
+          <Radio size={11} className="text-emerald-600" />
           <span>IMD & INSAT-3D Doppler Stream Online</span>
         </div>
       </div>

@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
     "10.39.103.62:3001",
     "192.168.*",
   ],
+  devIndicators: false,
 };
 
 export default nextConfig;
