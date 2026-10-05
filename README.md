@@ -1,5 +1,10 @@
 # SkyTrace — National Weather Intelligence & Verification Platform
 
+## 🚀 Live Deployments & Documentation
+
+* **Frontend Application (Vercel):** [https://sky-trace-drab.vercel.app](https://sky-trace-drab.vercel.app)
+* **Backend API & Swagger Docs (Render):** [https://skytrace-ojb5.onrender.com/docs](https://skytrace-ojb5.onrender.com/docs)
+
 SkyTrace is an end-to-end meteorological intelligence, deduplication, and verification platform built for **NDMA (National Disaster Management Authority)** and **IMD (India Meteorological Department)** analysts.
 
 The system continuously ingests crowdsourced weather observations from social media (#IMD, #CycloneWarning), mobile citizen observers, and automated weather stations (IMD AWS / Doppler radar networks). An AI pipeline normalizes, embeds (cross-lingually across Indian languages), deduplicates, and scores the trust probability of incoming reports before surfacing them on a live operations map and a conversational assistant.
